@@ -31,6 +31,6 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/midukkanpay/   # 👈 adjust to match your dist folder name
+          local-dir: ./dist/midukkanhostelHub/   # 👈 adjust to match your dist folder name
           server-dir: /wwwroot/
           dangerous-clean-slate: true
