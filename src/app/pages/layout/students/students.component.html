@@ -1,0 +1,45 @@
+<nb-card>
+    <nb-card-header>
+      Students
+      <button nbButton status="success" size="small" (click)="router.navigate(['pages/master/students/add'])" style="float:right">
+        Add Student
+      </button>
+    </nb-card-header>
+  
+    <nb-card-body>
+      <div style="margin-bottom:10px;">
+        <input nbInput placeholder="Search by name, email, phone" [(ngModel)]="searchQuery">
+        <button nbButton status="info" size="tiny" (click)="search()">Search</button>
+        <button nbButton status="secondary" size="tiny" (click)="searchQuery=''; search()">Reset</button>
+      </div>
+  
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>DOB</th>
+            <th>Gender</th>
+            <th>Guardian</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of filteredStudents">
+            <td>{{student.fullName}}</td>
+            <td>{{student.email}}</td>
+            <td>{{student.phone}}</td>
+            <td>{{student.dob | date:'shortDate'}}</td>
+            <td>{{student.gender}}</td>
+            <td>{{student.guardianName}} ({{student.guardianPhone}})</td>
+            <td>
+              <button nbButton status="primary" size="tiny" (click)="edit(student)">Edit</button>
+              <button nbButton status="danger" size="tiny" (click)="delete(student)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </nb-card-body>
+  </nb-card>
+  

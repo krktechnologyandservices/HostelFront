@@ -1,0 +1,73 @@
+/* Make forms look cleaner */
+.form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  /* Table styling */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table th, .table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+  }
+  
+  /* Card spacing */
+  nb-card {
+    margin: 15px auto;
+    max-width: 900px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+    border-radius: 12px;
+  }
+  
+  /* Buttons spacing */
+  button[nbButton] {
+    margin-right: 5px;
+  }
+  
+  /* Search bar */
+  input[nbInput] {
+    max-width: 250px;
+    margin-right: 10px;
+  }
+  
+  /* Responsive layout for mobile */
+  @media (max-width: 768px) {
+    .table, .table thead, .table tbody, .table th, .table td, .table tr {
+      display: block;
+      width: 100%;
+    }
+  
+    .table tr {
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+    }
+  
+    .table td {
+      border: none;
+      padding: 5px 0;
+    }
+  
+    .table td:before {
+      content: attr(data-label);
+      font-weight: bold;
+      display: block;
+    }
+  }
+  

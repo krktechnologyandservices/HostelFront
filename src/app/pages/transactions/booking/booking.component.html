@@ -1,0 +1,47 @@
+<nb-card>
+    <nb-card-header>
+      Bookings
+      <button nbButton status="success" size="small" style="float:right" (click)="addBooking()">Add Booking</button>
+    </nb-card-header>
+  
+    <nb-card-body>
+      <div style="margin-bottom:10px;">
+        <input nbInput placeholder="Search by student, room, period, status" [(ngModel)]="searchQuery">
+        <button nbButton status="info" size="tiny" (click)="search()">Search</button>
+        <button nbButton status="secondary" size="tiny" (click)="searchQuery=''; search()">Reset</button>
+      </div>
+  
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Room</th>
+            <th>Tariff</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of filteredBookings">
+            <td>{{ getStudentName(b.studentId) }}</td>
+            <td>{{ getRoomNumber(b.roomId) }}</td>
+            <td>{{ b.tariffPeriod }}</td>
+            <td>{{ b.startDate | date }}</td>
+            <td>{{ b.endDate | date }}</td>
+            <td>₹{{ b.amount }}</td>
+            <td>{{ b.status }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" (click)="editBooking(b)">Edit</button>
+              <!-- <button nbButton size="tiny" status="warning" (click)="changeStatus(b, 'Cancelled')">Cancel</button> -->
+              <button nbButton size="tiny" status="danger" (click)="deleteBooking(b)">Delete</button>
+              <button nbButton size="tiny" status="success" *ngIf="b.status==='Pending'" (click)="pay(b)">Pay</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </nb-card-body>
+  </nb-card>
+  

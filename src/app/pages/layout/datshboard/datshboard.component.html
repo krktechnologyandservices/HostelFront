@@ -1,0 +1,113 @@
+<nb-layout>
+    <nb-layout-column>
+  
+      <!-- KPI Cards -->
+      <div class="row mb-3">
+        <nb-card status="primary">
+          <nb-card-header>Total Students</nb-card-header>
+          <nb-card-body>{{studentStats?.totalStudents}}</nb-card-body>
+        </nb-card>
+  
+        <nb-card status="info">
+          <nb-card-header>Active Bookings</nb-card-header>
+          <nb-card-body>{{studentStats?.activeBookings}}</nb-card-body>
+        </nb-card>
+  
+        <nb-card status="success">
+          <nb-card-header>Vacated Students</nb-card-header>
+          <nb-card-body>{{studentStats?.vacatedStudents}}</nb-card-body>
+        </nb-card>
+  
+        <nb-card status="danger">
+          <nb-card-header>Total Late Fees</nb-card-header>
+          <nb-card-body>{{lateFees?.totalLateFees | currency}}</nb-card-body>
+        </nb-card>
+      </div>
+  
+      <!-- Pending Dues Table -->
+      <nb-card class="mb-3">
+        <nb-card-header>Pending Dues</nb-card-header>
+        <nb-card-body>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Room</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of pendingDues">
+                  <td>{{item.studentName}}</td>
+                  <td>{{item.roomNumber}}</td>
+                  <td>{{item.pendingAmount | currency}}</td>
+                  <td>{{item.dueDate | date}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </nb-card-body>
+      </nb-card>
+
+
+  }
+  
+      <!-- Upcoming Bills Table -->
+      <nb-card class="mb-3">
+        <nb-card-header>Upcoming Bills (Next 7 Days)</nb-card-header>
+        <nb-card-body>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Room</th>
+                  <th>Due Date</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let bill of upcomingBills">
+                  <td>{{bill.studentName}}</td>
+                  <td>{{bill.roomNumber}}</td>
+                  <td>{{bill.dueDate | date}}</td>
+                  <td>{{bill.totalAmount | currency}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </nb-card-body>
+      </nb-card>
+  
+      <!-- Room Utilization Table -->
+      <nb-card class="mb-3">
+        <nb-card-header>Room Utilization</nb-card-header>
+        <nb-card-body>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Room</th>
+                  <th>Capacity</th>
+                  <th>Occupied</th>
+                  <th>Available</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let room of roomUtilization">
+                  <td>{{room.roomNumber}}</td>
+                  <td>{{room.capacity}}</td>
+                  <td>{{room.occupiedCount}}</td>
+                  <td>{{room.capacity - room.occupiedCount}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </nb-card-body>
+      </nb-card>
+  
+    </nb-layout-column>
+  </nb-layout>
+  

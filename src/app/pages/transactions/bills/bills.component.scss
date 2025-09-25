@@ -1,0 +1,27 @@
+.bill-table {
+    width: 100%;
+    border-collapse: collapse;
+  
+    th, td {
+      text-align: left;
+      padding: 8px;
+      vertical-align: middle;
+      border-bottom: 1px solid #e0e0e0;
+    }
+  
+    th {
+      background-color: #f5f5f5;
+    }
+  
+    td button {
+      margin-right: 4px;
+    }
+  }
+  
+  @media screen and (max-width: 768px) {
+    .bill-table {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+  

@@ -1,0 +1,23 @@
+.row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  nb-card {
+    flex: 1 1 calc(25% - 1rem);
+    min-width: 200px;
+  }
+  
+  .table-responsive {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  table {
+    width: 100%;
+    th, td {
+      text-align: center;
+    }
+  }
+  

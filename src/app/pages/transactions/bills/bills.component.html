@@ -1,0 +1,43 @@
+<nb-card>
+    <nb-card-header>Bills</nb-card-header>
+    <nb-card-body *ngIf="!loading; else loadingTpl">
+      <table class="bill-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Room</th>
+            <th>Period</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Due Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let bill of bills">
+            <td>{{ bill.id }}</td>
+            <td>{{ bill.roomType }}</td>
+            <td>{{ bill.period }}</td>
+            <td>{{ bill.amount | currency:'INR' }}</td>
+            <td>
+              <span nbBadge="{{ bill.status }}" [nbBadgeStatus]="getBadgeStatus(bill.status)">
+                {{ bill.status }}
+              </span>
+            </td>
+            <td>{{ bill.dueDate | date:'dd-MMM-yyyy' }}</td>
+            <td>
+              <!-- <button nbButton size="tiny" status="success" (click)="payOnline(bill)" *ngIf="isPending(bill)">Pay Online</button> -->
+              <button nbButton size="tiny" status="info" (click)="uploadOffline(bill)" *ngIf="isPending(bill)">Upload Payment Details</button>
+              <button nbButton size="tiny" status="primary" (click)="approvePayment(bill)" *ngIf="bill.status.toLowerCase() === 'pending' && bill.paymentMode">Approve</button>
+              <button nbButton size="tiny" status="danger" (click)="rejectPayment(bill)" *ngIf="bill.status.toLowerCase() === 'pending' && bill.paymentMode">Reject</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </nb-card-body>
+  </nb-card>
+  
+  <ng-template #loadingTpl>
+    <nb-spinner size="giant"></nb-spinner>
+  </ng-template>
+  

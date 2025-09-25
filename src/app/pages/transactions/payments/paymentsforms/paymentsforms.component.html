@@ -1,0 +1,28 @@
+<nb-card>
+    <nb-card-header>Payment</nb-card-header>
+    <nb-card-body>
+      <form [formGroup]="paymentForm" (ngSubmit)="pay()">
+  
+        <div class="form-group">
+          <label>Payment Mode</label>
+          <select nbSelect fullWidth formControlName="paymentMode">
+            <option value="UPI">UPI</option>
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+          </select>
+        </div>
+  
+        <div class="form-group">
+          <label>Amount</label>
+          <input nbInput type="number" fullWidth formControlName="amount">
+        </div>
+  
+        <div style="margin-top:15px;">
+          <button nbButton status="success" type="submit">Pay</button>
+          <button nbButton status="danger" type="button" (click)="cancel()">Cancel</button>
+        </div>
+  
+      </form>
+    </nb-card-body>
+  </nb-card>
+  

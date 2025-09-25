@@ -1,0 +1,114 @@
+<nb-card>
+  <nb-card-header>{{ isEdit ? 'Edit Student' : 'Add Student' }}</nb-card-header>
+  <nb-card-body>
+    <form [formGroup]="studentForm" (ngSubmit)="save()">
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label>Full Name</label>
+        <input nbInput fullWidth formControlName="fullName" placeholder="Enter full name">
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label>Email</label>
+        <input nbInput fullWidth type="email" formControlName="email" placeholder="Enter email">
+      </div>
+
+      <!-- Phone -->
+      <div class="form-group">
+        <label>Phone</label>
+        <input nbInput fullWidth type="tel" formControlName="phone" placeholder="Enter phone number">
+      </div>
+
+      <!-- DOB -->
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <input nbInput fullWidth type="date" formControlName="dob">
+      </div>
+
+      <!-- Gender -->
+      <div class="form-group">
+        <label>Gender</label>
+        <nb-radio-group formControlName="gender">
+          <nb-radio value="Male">Male</nb-radio>
+          <nb-radio value="Female">Female</nb-radio>
+          <nb-radio value="Other">Other</nb-radio>
+        </nb-radio-group>
+      </div>
+
+      <!-- Address -->
+      <div class="form-group">
+        <label>Address</label>
+        <textarea nbInput fullWidth formControlName="address" placeholder="Enter address"></textarea>
+      </div>
+
+      <!-- Guardian Name -->
+      <div class="form-group">
+        <label>Guardian Name</label>
+        <input nbInput fullWidth formControlName="guardianName" placeholder="Enter guardian name">
+      </div>
+
+      <!-- Guardian Phone -->
+      <div class="form-group">
+        <label>Guardian Phone</label>
+        <input nbInput fullWidth formControlName="guardianPhone" placeholder="Enter guardian phone">
+      </div>
+
+      <!-- Admission Date -->
+      <div class="form-group">
+        <label>Admission Date</label>
+        <input nbInput fullWidth type="date" formControlName="admissionDate">
+      </div>
+
+      <!-- Blood Group -->
+      <div class="form-group">
+        <label>Blood Group</label>
+        <nb-select placeholder="Select Blood Group" formControlName="bloodGroup" fullWidth>
+          <nb-option value="A+">A+</nb-option>
+          <nb-option value="A-">A-</nb-option>
+          <nb-option value="B+">B+</nb-option>
+          <nb-option value="B-">B-</nb-option>
+          <nb-option value="O+">O+</nb-option>
+          <nb-option value="O-">O-</nb-option>
+          <nb-option value="AB+">AB+</nb-option>
+          <nb-option value="AB-">AB-</nb-option>
+        </nb-select>
+      </div>
+
+      <!-- ID Proof -->
+      <div class="form-group">
+        <label>ID Proof</label>
+        <input nbInput fullWidth formControlName="idProof" placeholder="Enter ID Proof (e.g. Aadhaar)">
+      </div>
+
+      <!-- Room Assignment -->
+      <!-- <div class="form-group">
+        <label>Assigned Room</label>
+        <nb-select fullWidth placeholder="Select Room" formControlName="roomId">
+          <nb-option *ngFor="let room of rooms" [value]="room.id">
+            {{ room.roomNumber }} ({{ room.type }})
+          </nb-option>
+        </nb-select>
+      </div> -->
+
+      <!-- Billing Mode -->
+      <!-- <div class="form-group">
+        <label>Billing Mode</label>
+        <nb-select fullWidth formControlName="billingMode" placeholder="Select Billing Mode">
+          <nb-option value="Monthly">Monthly</nb-option>
+          <nb-option value="Quarterly">Quarterly</nb-option>
+          <nb-option value="Half-Yearly">Half-Yearly</nb-option>
+          <nb-option value="Annually">Annually</nb-option>
+        </nb-select>
+      </div> -->
+
+      <!-- Buttons -->
+      <div style="margin-top: 15px;">
+        <button nbButton status="primary" type="submit">{{ isEdit ? 'Update' : 'Add' }}</button>
+        <button nbButton status="danger" type="button" (click)="cancel()">Cancel</button>
+      </div>
+
+    </form>
+  </nb-card-body>
+</nb-card>
