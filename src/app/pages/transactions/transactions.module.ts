@@ -9,7 +9,7 @@ import {
   NbStepperModule,
   NbTabsetModule, NbUserModule,NbCheckboxModule,NbInputModule ,NbSelectModule,
   NbIconModule,
-  NbFormFieldModule,NbAutocompleteModule ,NbBadgeModule
+  NbFormFieldModule,NbAutocompleteModule ,NbBadgeModule, NbLayoutModule
 
 } from '@nebular/theme';
 
@@ -33,8 +33,9 @@ import { PaymentsComponent } from './payments/payments.component';
 import { PaymentFormComponent } from './payments/paymentsforms/paymentsforms.component';
 import { BookingFormComponent } from './booking/bookingforms/bookingforms.component';
 import { BillsComponent } from './bills/bills.component';
-import { OfflineuploadComponent } from './bills/offlineupload/offlineupload.component';
+
 import { AdminApprovalComponent } from './bills/admin-approval/admin-approval.component';
+import { OfflinePaymentModalComponent } from './bills/offlinepaymentmodal/offlinepaymentmodal.component';
 
 
 @NgModule({
@@ -55,7 +56,7 @@ import { AdminApprovalComponent } from './bills/admin-approval/admin-approval.co
     NbInputModule ,
     NbSelectModule,
     NbIconModule,
-    NbFormFieldModule,NbAutocompleteModule ,NbBadgeModule
+    NbFormFieldModule,NbAutocompleteModule ,NbBadgeModule,NbLayoutModule
   ],
   declarations: [
     TransactionsComponent,
@@ -75,8 +76,9 @@ import { AdminApprovalComponent } from './bills/admin-approval/admin-approval.co
     PaymentFormComponent,
     BookingFormComponent,
     BillsComponent,
-    OfflineuploadComponent,
-    AdminApprovalComponent
+
+    AdminApprovalComponent,
+    OfflinePaymentModalComponent
   
   ],
   

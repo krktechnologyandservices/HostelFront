@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NbDialogRef } from '@nebular/theme';
 import { BillingService } from '../billsservice.service';
@@ -7,45 +7,53 @@ import { BillingService } from '../billsservice.service';
   selector: 'app-offline-payment-modal',
   templateUrl: './offlinepaymentmodal.component.html',
 })
-export class OfflinePaymentModalComponent {
-  paymentForm: FormGroup;
-  billId!: number;
+export class OfflinePaymentModalComponent implements OnInit {
+  @Input() billId!: number;
+  @Input() amount!: number;
+
+  paymentForm!: FormGroup;
+  paymentModes = ['Cash', 'GooglePay', 'UPI', 'Other'];
+  selectedFile: File | null = null;
 
   constructor(
     private fb: FormBuilder,
     private dialogRef: NbDialogRef<OfflinePaymentModalComponent>,
-    private offlinePaymentService: BillingService
-  ) {
+    private billingser: BillingService
+  ) {}
+
+  ngOnInit(): void {
     this.paymentForm = this.fb.group({
-      billId: [null, Validators.required],
+      billId: [this.billId, Validators.required],
+      amount: [this.amount, Validators.required],
       paymentMode: [null, Validators.required],
-      denomination: [''],
-      amount: [0, Validators.required],
-      paymentDate: [new Date(), Validators.required],
+      referenceNumber: [''],
+      paymentDate: [new Date().toISOString().substring(0, 10), Validators.required],
       receiptUrl: ['']
     });
   }
 
-  // Initialize modal with data passed via context
-  setContext(context: any) {
-    this.billId = context.billId;
-    this.paymentForm.patchValue({ billId: this.billId });
+  onFileSelected(event: any) {
+    if (event.target.files.length > 0) {
+      this.selectedFile = event.target.files[0];
+      this.paymentForm.patchValue({ receiptUrl: this.selectedFile.name });
+    }
   }
 
   submit() {
     const formValue = this.paymentForm.value;
+
     const paymentDate = new Date(formValue.paymentDate);
 
     const payload = {
       billId: formValue.billId,
-      paymentMode: formValue.paymentMode,
-      denomination: formValue.denomination,
       amount: formValue.amount,
+      paymentMode: formValue.paymentMode,
+      referenceNumber: formValue.referenceNumber,
       paymentDate: paymentDate.toISOString(),
       receiptUrl: formValue.receiptUrl
     };
 
-    this.offlinePaymentService.uploadOfflinePayment(payload).subscribe({
+    this.billingser.uploadOfflinePayment(payload).subscribe({
       next: () => this.dialogRef.close(true),
       error: (err) => console.error(err)
     });

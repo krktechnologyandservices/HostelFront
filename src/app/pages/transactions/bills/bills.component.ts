@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Bill, BillingService } from './billsservice.service';
-
+import { NbDialogService } from '@nebular/theme';
+import { NbToastrService, NbGlobalPhysicalPosition, NbGlobalPosition } from '@nebular/theme'
+import { OfflinePaymentModalComponent } from './offlinepaymentmodal/offlinepaymentmodal.component';
 @Component({
   selector: 'app-bills',
   templateUrl: './bills.component.html',
@@ -11,7 +13,10 @@ export class BillsComponent implements OnInit {
   bills: Bill[] = [];
   loading: boolean = false;
 
-  constructor(private billingService: BillingService) {}
+  constructor(private billingService: BillingService, 
+    private dialogService: NbDialogService,
+    private toastrService: NbToastrService
+    ) {}
 
   ngOnInit(): void {
     this.loadBills();
@@ -33,7 +38,7 @@ export class BillsComponent implements OnInit {
   }
 
   isPending(bill: Bill) {
-    return bill.status.toLowerCase() === 'pending';
+    return bill.status.toLowerCase() === 'pending' ||  bill.status.toLowerCase() === 'modified';
   }
 
   payOnline(bill: Bill) {
@@ -43,24 +48,24 @@ export class BillsComponent implements OnInit {
     });
   }
 
-  uploadOffline(bill: Bill) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*,application/pdf';
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (!file) return;
 
-      const formData = new FormData();
-      formData.append('file', file);
+  uploadOffline(bill: any) {
+    const dialogRef = this.dialogService.open(OfflinePaymentModalComponent, {
+      closeOnBackdropClick: false,
+      closeOnEsc: true,
+    });
+  
+    // Pass the billId after dialog creation
+    dialogRef.componentRef.instance.billId = bill.id;
+    dialogRef.componentRef.instance.amount = bill.amount;
 
-      this.billingService.uploadOfflinePayment(bill.id, formData).subscribe({
-        next: () => this.loadBills(),
-        error: (err) => console.error('Offline upload failed', err)
-      });
-    };
-    input.click();
+    dialogRef.onClose.subscribe(result => {
+      if (result) {
+        this.loadBills(); // refresh bills after successful offline payment
+      }
+    });
   }
+
 
   approvePayment(bill: Bill) {
     this.billingService.approvePayment(bill.id).subscribe({

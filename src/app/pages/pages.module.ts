@@ -22,6 +22,7 @@ import {ReactiveFormsModule } from  '@angular/forms';
 import { PayslipviewComponent } from './reports/payslipview/payslipview.component';
 
 
+
 @NgModule({
   imports: [
     NbFormFieldModule,
@@ -48,6 +49,7 @@ import { PayslipviewComponent } from './reports/payslipview/payslipview.componen
   ],
   declarations: [
     PagesComponent,
+    
     
 
     

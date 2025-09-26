@@ -28,8 +28,21 @@ export class BillingService {
     return this.http.post(`${this.baseUrl}/pay-online/${billId}`, {});
   }
 
-  uploadOfflinePayment(billId: number, formData: FormData): Observable<any> {
-    return this.http.post(`${this.baseUrl}/upload-offline/${billId}`, formData);
+  uploadOfflinePayment(payment: any, file?: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('billId', payment.billId);
+    formData.append('amount', payment.amount);
+    formData.append('paymentMode', payment.paymentMode);
+    formData.append('referenceNumber', payment.referenceNumber); // if available
+    formData.append('paymentDate', payment.paymentDate); // ISO string or formatted date
+    if (payment.paidAmount) formData.append('paidAmount', payment.paidAmount.toString());
+    if (payment.remarks) formData.append('remarks', payment.remarks);
+    
+    if (file) {
+      formData.append('receiptSnapshot', file, file.name);
+    }
+  
+    return this.http.post(`${this.baseUrl}/offline-payment`, formData);
   }
 
   getOfflinePayments(): Observable<Bill[]> {
@@ -49,5 +62,5 @@ export class BillingService {
     return this.http.put(`${this.baseUrl}/soft-delete/${id}`, {});
   }
 
-  
+
 }
