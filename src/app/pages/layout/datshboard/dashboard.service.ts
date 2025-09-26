@@ -14,4 +14,7 @@ export class DashboardService {
   getLateFees(): Observable<any> { return this.http.get(`${this.baseUrl}/late-fees`); }
   getRoomUtilization(): Observable<any> { return this.http.get(`${this.baseUrl}/room-utilization`); }
   getStudentStats(): Observable<any> { return this.http.get(`${this.baseUrl}/student-stats`); }
+  generateBills(): Observable<any> {
+    return this.http.post(`${this.baseUrl}/generate-bills`, {});
+  }
 }

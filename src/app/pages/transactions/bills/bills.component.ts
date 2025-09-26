@@ -87,4 +87,17 @@ export class BillsComponent implements OnInit {
       default: return 'basic';
     }
   }
+  deleteBill(bill: any) {
+    if (confirm(`Are you sure you want to delete Bill #${bill.id}?`)) {
+      this.billingService.softDeleteBill(bill.id).subscribe({
+        next: () => {
+          bill.status = 'Deleted'; // update UI immediately
+        },
+        error: (err) => {
+          console.error('Delete failed', err);
+          alert('Delete failed, please try again.');
+        }
+      });
+    }
+  }
 }

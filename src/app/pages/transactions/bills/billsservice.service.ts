@@ -42,5 +42,12 @@ export class BillingService {
 
   rejectPayment(billId: number): Observable<any> {
     return this.http.post(`${this.baseUrl}/reject/${billId}`, {});
+    
   }
+
+  softDeleteBill(id: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/soft-delete/${id}`, {});
+  }
+
+  
 }

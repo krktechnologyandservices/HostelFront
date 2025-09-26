@@ -51,14 +51,29 @@
         </nb-card-body>
       </nb-card>
 
-
-  }
   
       <!-- Upcoming Bills Table -->
       <nb-card class="mb-3">
-        <nb-card-header>Upcoming Bills (Next 7 Days)</nb-card-header>
+        <nb-card-header class="d-flex justify-content-between align-items-center">
+          <span>Upcoming Bills (Next 7 Days)</span>
+      
+          <!-- Attractive Button -->
+          <button nbButton status="success" size="small" (click)="onGenerateBills()" [disabled]="isGenerating" nbTooltip="Generate Bills Now">
+            <nb-icon *ngIf="!isGenerating" icon="flash-outline"></nb-icon>
+            <span *ngIf="!isGenerating">Generate</span>
+      
+            <!-- Show spinner when busy -->
+            <nb-spinner *ngIf="isGenerating" size="tiny"></nb-spinner>
+          </button>
+        </nb-card-header>
+      
         <nb-card-body>
-          <div class="table-responsive">
+          <div *ngIf="isGenerating" class="text-center my-3">
+            <nb-spinner size="large"></nb-spinner>
+            <p class="mt-2">Generating bills, please wait...</p>
+          </div>
+      
+          <div class="table-responsive" *ngIf="!isGenerating">
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -80,6 +95,8 @@
           </div>
         </nb-card-body>
       </nb-card>
+      
+      
   
       <!-- Room Utilization Table -->
       <nb-card class="mb-3">

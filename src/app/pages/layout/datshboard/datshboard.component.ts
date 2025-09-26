@@ -12,7 +12,7 @@ export class DashboardComponent implements OnInit {
   lateFees: any;
   roomUtilization: any = [];
   studentStats: any;
-
+  isGenerating: boolean = false;
   constructor(private service: DashboardService) {}
 
   ngOnInit(): void {
@@ -26,4 +26,20 @@ export class DashboardComponent implements OnInit {
     this.service.getRoomUtilization().subscribe(res => this.roomUtilization = res);
     this.service.getStudentStats().subscribe(res => this.studentStats = res);
   }
-}
+
+    onGenerateBills() {
+      this.isGenerating = true;
+      this.service.generateBills().subscribe({
+        next: () => {
+          this.isGenerating = false;
+          this.loadDashboard(); // refresh stats/bills after SP finishes
+        },
+        error: () => {
+          this.isGenerating = false;
+          alert('Error generating bills!');
+        }
+      });
+
+    }
+  }
+
