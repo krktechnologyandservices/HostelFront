@@ -12,6 +12,7 @@ export interface Booking {
   endDate: string;
   status?: string;
   amount?: number;
+  vocationDate?:Date;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -42,5 +43,8 @@ export class BookingService {
 
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.api}/${id}`);
+  }
+  updateVocation(id: number, data: { vocationDate?: string; status: string }) {
+    return this.http.put(`${this.api}/${id}/vocation`, data);
   }
 }

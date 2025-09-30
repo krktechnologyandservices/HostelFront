@@ -1,0 +1,4 @@
+.row { display:flex; gap:12px; flex-wrap:wrap; }
+.col-md-4 { flex: 0 0 32%; }
+.col-md-6 { flex: 0 0 48%; }
+.table { width:100%; border-collapse:collapse; th, td { padding:8px; border-bottom:1px solid #eee; } }

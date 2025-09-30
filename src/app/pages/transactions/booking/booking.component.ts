@@ -15,6 +15,11 @@ export class BookingComponent implements OnInit {
   rooms: Room[] = [];
   searchQuery = '';
 
+  // Vocation
+  selectedBooking: Booking | null = null;
+  showVocationModal = false;
+  vocationDate: string = '';
+
   constructor(
     private bookingService: BookingService,
     private studentService: StudentService,
@@ -66,12 +71,6 @@ export class BookingComponent implements OnInit {
     this.router.navigate(['pages/transactions/bookings/edit', b.id]);
   }
 
-  changeStatus(b: Booking, status: string) {
-    if (confirm(`Are you sure you want to mark booking ${b.id} as ${status}?`)) {
-      this.bookingService.updateStatus(b.id!, status).subscribe(() => this.loadData());
-    }
-  }
-
   deleteBooking(b: Booking) {
     if (b.status === 'Billed') {
       alert('Booking cannot be deleted because bills are generated.');
@@ -85,4 +84,26 @@ export class BookingComponent implements OnInit {
   pay(booking: Booking) {
     this.router.navigate(['pages/transactions/bookings/payment', booking.id]);
   }
+
+  // ------------------ VOCATION ------------------
+
+  openVocationModal(b: Booking) {
+    this.selectedBooking = b;
+    this.vocationDate = b.vocationDate ? new Date(b.vocationDate).toISOString().substring(0,10) : '';
+    this.showVocationModal = true;
+  }
+
+  saveVocation() {
+    if (!this.selectedBooking) return;
+
+    this.bookingService.updateVocation(this.selectedBooking.id!, {
+      vocationDate: this.vocationDate,
+      status: 'Vocate'
+    }).subscribe(() => {
+      this.loadData();
+      this.showVocationModal = false;
+      this.selectedBooking = null;
+    });
+  }
+  
 }

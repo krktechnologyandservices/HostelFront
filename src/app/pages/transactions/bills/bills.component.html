@@ -1,58 +1,54 @@
-<nb-layout>
-  <nb-layout-header fixed>
-    <div style="padding: 0 1rem;">Hostel Management - Bills</div>
-  </nb-layout-header>
+<!-- Header -->
+<header class="app-header">
+  Hostel Management - Bills
+</header>
 
-  <nb-layout-column>
-    <nb-card>
-      <nb-card-header>Bills</nb-card-header>
-      <nb-card-body *ngIf="!loading; else loadingTpl">
-        <table class="bill-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Room</th>
-              <th>Period</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Due Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let bill of bills">
-              <td>{{ bill.id }}</td>
-              <td>{{ bill.roomType }}</td>
-              <td>{{ bill.period }}</td>
-              <td>{{ bill.amount | currency:'INR' }}</td>
-              <td>
-                <span nbBadge="{{ bill.status }}" [nbBadgeStatus]="getBadgeStatus(bill.status)">
-                  {{ bill.status }}
-                </span>
-              </td>
-              <td>{{ bill.dueDate | date:'dd-MMM-yyyy' }}</td>
-              <td>
-                <button nbButton size="tiny" status="info" (click)="uploadOffline(bill)" *ngIf="isPending(bill)">
-                  Upload Payment Details
-                </button>
-                <button nbButton size="tiny" status="primary" (click)="approvePayment(bill)" *ngIf="bill.status.toLowerCase() === 'pending' && bill.paymentMode">
-                  Approve
-                </button>
-                <button nbButton size="tiny" status="danger" (click)="rejectPayment(bill)" *ngIf="bill.status.toLowerCase() === 'pending' && bill.paymentMode">
-                  Reject
-                </button>
-                <button nbButton size="tiny" status="danger" (click)="deleteBill(bill)" *ngIf="bill.status.toLowerCase() !== 'deleted'">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </nb-card-body>
-    </nb-card>
+<!-- Bills Section -->
+<nb-card>
+  <nb-card-header>Bills</nb-card-header>
+  <nb-card-body *ngIf="!loading; else loadingTpl">
 
-    <ng-template #loadingTpl>
-      <nb-spinner size="giant"></nb-spinner>
-    </ng-template>
-  </nb-layout-column>
-</nb-layout>
+    <!-- Responsive Table / Card Grid -->
+    <div class="bills-container">
+      <div class="bill-item" *ngFor="let bill of bills">
+        <div class="bill-field"><strong>ID:</strong> {{ bill.id }}</div>
+        <div class="bill-field"><strong>Room:</strong> {{ bill.roomType }}</div>
+        <div class="bill-field"><strong>Period:</strong> {{ bill.period }}</div>
+        <div class="bill-field"><strong>Amount:</strong> {{ bill.amount | currency:'INR' }}</div>
+        <div class="bill-field">
+          <strong>Status:</strong>
+          <span nbBadge="{{ bill.status }}" [nbBadgeStatus]="getBadgeStatus(bill.status)">
+            {{ bill.status }}
+          </span>
+        </div>
+        <div class="bill-field"><strong>Due:</strong> {{ bill.dueDate | date:'dd-MMM-yyyy' }}</div>
+
+        <div class="bill-actions">
+          <button nbButton size="small" status="info"
+                  (click)="uploadOffline(bill)" *ngIf="isPending(bill)">
+            Upload Payment
+          </button>
+          <button nbButton size="small" status="primary"
+                  (click)="approvePayment(bill)" *ngIf="bill.status.toLowerCase() === 'pending' && bill.paymentMode">
+            Approve
+          </button>
+          <button nbButton size="small" status="danger"
+                  (click)="rejectPayment(bill)" *ngIf="bill.status.toLowerCase() === 'pending' && bill.paymentMode">
+            Reject
+          </button>
+          <button nbButton size="small" status="danger"
+                  (click)="deleteBill(bill)" *ngIf="bill.status.toLowerCase() !== 'deleted'">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<!-- Loading -->
+<ng-template #loadingTpl>
+  <div class="loading-container">
+    <nb-spinner size="giant"></nb-spinner>
+  </div>
+</ng-template>

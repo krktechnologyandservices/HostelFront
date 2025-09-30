@@ -29,7 +29,7 @@ import { PayPeriodListComponent } from './payperiod/payperiod.component';
 import { PayPeriodFormComponent } from './payperiod/payperiod-form/payperiod-form.component';
 import { EmployeePayComponent } from './salarycomponents/salarycomponents.component';
 import { BookingComponent } from './booking/booking.component';
-import { PaymentsComponent } from './payments/payments.component';
+import { PaymentListComponent } from './payments/payments.component';
 import { PaymentFormComponent } from './payments/paymentsforms/paymentsforms.component';
 import { BookingFormComponent } from './booking/bookingforms/bookingforms.component';
 import { BillsComponent } from './bills/bills.component';
@@ -72,7 +72,7 @@ import { OfflinePaymentModalComponent } from './bills/offlinepaymentmodal/offlin
     PayPeriodFormComponent,
     EmployeePayComponent,
     BookingComponent,
-    PaymentsComponent,
+    PaymentListComponent,
     PaymentFormComponent,
     BookingFormComponent,
     BillsComponent,

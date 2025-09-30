@@ -40,6 +40,11 @@ export class StudentsComponent implements OnInit {
     }
   }
 
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.filteredStudents = this.students;
+  }
+
   edit(student: Student): void {
     if (!student || student.studentId == null) {
       console.error('studentId is missing', student);

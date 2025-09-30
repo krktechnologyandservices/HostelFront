@@ -59,11 +59,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
         pathMatch: 'prefix',
         link: '/pages/transactions/bills',
        },
-      // {
-      //   title: 'Payments',
-      //   pathMatch: 'prefix',
-      //   link: '/pages/transactions/payments',
-      // },
+      {
+        title: 'Payments',
+        pathMatch: 'prefix',
+        link: '/pages/transactions/payments',
+      },
     //   {
     //   title: 'Salary Pay component',
     //   pathMatch: 'prefix',

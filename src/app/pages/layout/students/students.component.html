@@ -1,45 +1,105 @@
 <nb-card>
-    <nb-card-header>
-      Students
-      <button nbButton status="success" size="small" (click)="router.navigate(['pages/master/students/add'])" style="float:right">
-        Add Student
-      </button>
-    </nb-card-header>
-  
-    <nb-card-body>
-      <div style="margin-bottom:10px;">
-        <input nbInput placeholder="Search by name, email, phone" [(ngModel)]="searchQuery">
+  <nb-card-header>
+    <span>Students</span>
+    <button nbButton status="success" size="small" (click)="router.navigate(['pages/master/students/add'])" class="add-button">
+      Add Student
+    </button>
+  </nb-card-header>
+
+  <nb-card-body>
+    <!-- Search Section -->
+    <div class="search-section">
+      <input nbInput placeholder="Search by name, email, phone" [(ngModel)]="searchQuery" class="search-input">
+      <div class="search-buttons">
         <button nbButton status="info" size="tiny" (click)="search()">Search</button>
-        <button nbButton status="secondary" size="tiny" (click)="searchQuery=''; search()">Reset</button>
+        <button nbButton status="secondary" size="tiny" (click)="clearSearch()">Reset</button>
       </div>
-  
-      <table class="table table-bordered table-striped">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>DOB</th>
-            <th>Gender</th>
-            <th>Guardian</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let student of filteredStudents">
-            <td>{{student.fullName}}</td>
-            <td>{{student.email}}</td>
-            <td>{{student.phone}}</td>
-            <td>{{student.dob | date:'shortDate'}}</td>
-            <td>{{student.gender}}</td>
-            <td>{{student.guardianName}} ({{student.guardianPhone}})</td>
-            <td>
-              <button nbButton status="primary" size="tiny" (click)="edit(student)">Edit</button>
-              <button nbButton status="danger" size="tiny" (click)="delete(student)">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </nb-card-body>
-  </nb-card>
-  
+    </div>
+
+    <!-- Desktop Table View
+    <div class="view-container desktop-view">
+      <div class="table-wrapper">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>DOB</th>
+              <th>Gender</th>
+              <th>Guardian</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let student of filteredStudents">
+              <td><strong>{{student.fullName}}</strong></td>
+              <td>{{student.email}}</td>
+              <td>{{student.phone}}</td>
+              <td>{{student.dob | date:'shortDate'}}</td>
+              <td>
+                <span class="gender-badge" [class]="student.gender?.toLowerCase()">
+                  {{student.gender}}
+                </span>
+              </td>
+              <td>
+                <div>{{student.guardianName}}</div>
+                <small class="text-muted">{{student.guardianPhone}}</small>
+              </td>
+              <td class="actions">
+                <button nbButton status="primary" size="tiny" (click)="edit(student)">Edit</button>
+                <button nbButton status="danger" size="tiny" (click)="delete(student)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div> -->
+
+    <!-- Mobile Card View -->
+    <div class="view-container mobile-view">
+      <div class="student-cards">
+        <div class="student-card" *ngFor="let student of filteredStudents">
+          <div class="card-header">
+            <h4>{{student.fullName}}</h4>
+            <span class="gender-badge" [class]="student.gender?.toLowerCase()">
+              {{student.gender}}
+            </span>
+          </div>
+          <div class="card-content">
+            <div class="info-item">
+              <label>Email:</label>
+              <span>{{student.email}}</span>
+            </div>
+            <div class="info-item">
+              <label>Phone:</label>
+              <span>{{student.phone}}</span>
+            </div>
+            <div class="info-item">
+              <label>DOB:</label>
+              <span>{{student.dob | date:'shortDate'}}</span>
+            </div>
+            <div class="info-item">
+              <label>Guardian:</label>
+              <span>{{student.guardianName}}</span>
+            </div>
+            <div class="info-item">
+              <label>Guardian Phone:</label>
+              <span>{{student.guardianPhone}}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button nbButton status="primary" size="tiny" (click)="edit(student)">Edit</button>
+            <button nbButton status="danger" size="tiny" (click)="delete(student)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredStudents.length === 0" class="no-data">
+      <h3>No students found</h3>
+      <p *ngIf="searchQuery">Try adjusting your search criteria</p>
+    </div>
+  </nb-card-body>
+</nb-card>

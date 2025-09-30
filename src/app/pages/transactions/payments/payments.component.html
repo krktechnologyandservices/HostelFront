@@ -1,1 +1,32 @@
-<p>payments works!</p>
+<nb-card>
+  <nb-card-header>
+    Payments
+    <button nbButton status="primary" size="tiny" (click)="openPaymentDialog()">Add Payment</button>
+
+
+  </nb-card-header>
+  <nb-card-body>
+    <nb-spinner *ngIf="loading"></nb-spinner>
+    <table class="table" *ngIf="!loading">
+      <thead>
+        <tr>
+          <th>Date</th><th>StudentId</th><th>Mode</th><th>Amount</th><th>Type</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of payments">
+          <td>{{p.paymentDate | date:'shortDate'}}</td>
+          <td>{{p.studentId}}</td>
+          <td>{{p.paymentMode}}</td>
+          <td>{{p.amount | currency}}</td>
+          <td>{{p.paymentType}}</td>
+          <td>
+            <button nbButton size="tiny" status="info" (click)="edit(p)">Edit</button>
+            <button nbButton size="tiny" status="danger" (click)="delete(p)">Delete</button>
+            <button nbButton size="tiny" status="primary" (click)="printReceipt(p)">Print</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </nb-card-body>
+</nb-card>
