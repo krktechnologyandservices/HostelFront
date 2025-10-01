@@ -12,11 +12,13 @@ export interface Student {
   address?: string;
   guardianName?: string;
   guardianPhone?: string;
+  guardianAlternativeMobile:string;
   admissionDate?: string;
     bloodGroup:string ;
    idProof:string;
-
+   relationship:string;
    roomId :string;
+   photoUrl:string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,4 +35,18 @@ export class StudentService {
   add(student: Student): Observable<any> { return this.http.post(this.api, student); }
   update(id: number, student: Student): Observable<any> { return this.http.put(`${this.api}/${id}`, student); }
   delete(id: number): Observable<any> { return this.http.delete(`${this.api}/${id}`); }
+
+  uploadPhoto(id: number, formData: FormData): Observable<{ photoUrl: string }> {
+    return this.http.post<{ photoUrl: string }>(`${this.api}/${id}/upload-photo`, formData);
+  }
+  
+  deletePhoto(id: number): Observable<any> {
+    return this.http.delete(`${this.api}/${id}/delete-photo`);
+  }
+  
+  getPhoto(studentId: number): Observable<Blob> {
+    return this.http.get(`${this.api}/${studentId}/photo`, { responseType: 'blob' });
+  }
+
+
 }

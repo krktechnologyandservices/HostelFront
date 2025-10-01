@@ -1,0 +1,13 @@
+/* Hide one view based on screen width */
+.desktop-view { display: block; }
+.mobile-view { display: none; }
+
+@media (max-width: 767px) {
+  .desktop-view { display: none; }
+  .mobile-view { display: block; }
+}
+
+/* Card styling for mobile */
+.payment-card {
+  margin-bottom: 16px;
+}

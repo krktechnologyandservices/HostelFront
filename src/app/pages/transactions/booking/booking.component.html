@@ -38,7 +38,7 @@
           <td>
             <button nbButton size="tiny" status="info" (click)="editBooking(b)">Edit</button>
             <button nbButton size="tiny" status="warning" (click)="openVocationModal(b)">Vocate</button>
-            <button nbButton size="tiny" status="danger" (click)="deleteBooking(b)">Delete</button>
+            <button nbButton size="tiny" status="danger" (click)="deleteBooking(b)">Cancel</button>
             <button nbButton size="tiny" status="success" *ngIf="b.status==='Pending'" (click)="pay(b)">Pay</button>
           </td>
         </tr>

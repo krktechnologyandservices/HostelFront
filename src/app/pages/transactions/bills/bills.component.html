@@ -25,7 +25,7 @@
 
         <div class="bill-actions">
           <button nbButton size="small" status="info"
-                  (click)="uploadOffline(bill)" *ngIf="isPending(bill)">
+                  (click)="uploadOffline(bill)" *ngIf="isPending(bill) && 1==2">
             Upload Payment
           </button>
           <button nbButton size="small" status="primary"
@@ -37,8 +37,8 @@
             Reject
           </button>
           <button nbButton size="small" status="danger"
-                  (click)="deleteBill(bill)" *ngIf="bill.status.toLowerCase() !== 'deleted'">
-            Delete
+                  (click)="deleteBill(bill)" *ngIf="bill.status.toLowerCase() !== 'cancelled'">
+            Cancel
           </button>
         </div>
       </div>

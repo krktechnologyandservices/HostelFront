@@ -64,11 +64,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
         pathMatch: 'prefix',
         link: '/pages/transactions/payments',
       },
-    //   {
-    //   title: 'Salary Pay component',
-    //   pathMatch: 'prefix',
-    //   link: '/pages/transactions/salarypaycomponent',
-    // },
+      {
+      title: 'Daybook view',
+      pathMatch: 'prefix',
+      link: '/pages/transactions/daybookview',
+    },
   
     ],
   },

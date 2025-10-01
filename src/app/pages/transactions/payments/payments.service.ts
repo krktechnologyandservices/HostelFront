@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export interface PendingBill {
   billId: number;
   period?: string;
+  roomNumber?: string;
   billAmount: number;
   paidAmount: number;
   balance: number;
@@ -55,7 +55,6 @@ export interface ExpenseHead {
   name: string;
 }
 
-
 export interface BillAdjustmentView {
   billId: number;
   period?: string;
@@ -65,37 +64,55 @@ export interface BillAdjustmentView {
 
 export interface AdditionalChargeView {
   expenseHeadId: number;
-  expenseHeadName?: string; // optional if you want to display the head name
+  expenseHeadName?: string;
   amount: number;
   remarks?: string;
 }
 
 export interface PaymentReceiptView extends PaymentView {
-  denominations?: string; // for cash breakdown
+  denominations?: string;
   billAdjustments?: BillAdjustmentView[];
   additionalCharges?: AdditionalChargeView[];
 }
 
-
-
-
-
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
-  private api = `${environment.apiBaseUrl}/payments`;
+  private readonly api = `${environment.apiBaseUrl}/payments`;
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<PaymentView[]> { return this.http.get<PaymentView[]>(this.api); }
+  /** Get all payments */
+  getAll(): Observable<PaymentView[]> {
+    return this.http.get<PaymentView[]>(this.api);
+  }
 
-  getById(id: number) { return this.http.get<PaymentView>(`${this.api}/${id}`); }
+  /** Get a single payment by ID */
+  getById(id: number): Observable<PaymentView> {
+    return this.http.get<PaymentView>(`${this.api}/${id}`);
+  }
 
-  getPendingBills(studentId: number) { return this.http.get<PendingBill[]>(`${this.api}/pending-bills/${studentId}`); }
+  /** Get pending bills for a student */
+  getPendingBills(studentId: number): Observable<PendingBill[]> {
+    return this.http.get<PendingBill[]>(`${this.api}/pending-bills/${studentId}`);
+  }
 
-  getExpenseHeads() { return this.http.get<ExpenseHead[]>(`${this.api}/expense-heads`); }
+  /** Get available expense heads */
+  getExpenseHeads(): Observable<ExpenseHead[]> {
+    return this.http.get<ExpenseHead[]>(`${this.api}/expense-heads`);
+  }
 
-  create(dto: PaymentCreateDto) { return this.http.post(this.api, dto); }
+  /** Create new payment */
+  create(dto: PaymentCreateDto): Observable<any> {
+    return this.http.post(this.api, dto);
+  }
 
-  delete(id: number) { return this.http.delete(`${this.api}/${id}`); }
+  /** Update existing payment */
+  update(paymentId: number, dto: PaymentCreateDto): Observable<any> {
+    return this.http.put(`${this.api}/${paymentId}`, dto);
+  }
+
+  /** Delete payment */
+  delete(paymentId: number): Observable<any> {
+    return this.http.delete(`${this.api}/${paymentId}`);
+  }
 }
-

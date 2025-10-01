@@ -1,28 +1,9 @@
-import { Component, OnInit,NgZone  } from '@angular/core';
-import { NbDialogService, NbToastrService } from '@nebular/theme';
+import { Component, OnInit, NgZone } from '@angular/core';
+import { NbToastrService } from '@nebular/theme';
 import { PaymentService, PaymentView } from './payments.service';
-import { PaymentFormComponent } from './paymentsforms/paymentsforms.component';
+import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-interface BillAdjustmentView {
-  billId: number;
-  period?: string;
-  adjustedAmount: number;
-  remarks?: string;
-}
-
-interface AdditionalChargeView {
-  expenseHeadId: number;
-  expenseHeadName?: string;
-  amount: number;
-  remarks?: string;
-}
-
-interface PaymentReceiptView extends PaymentView {
-  denominations?: string;
-  billAdjustments?: BillAdjustmentView[];
-  additionalCharges?: AdditionalChargeView[];
-}
 
 @Component({
   selector: 'app-payment-list',
@@ -35,9 +16,9 @@ export class PaymentListComponent implements OnInit {
 
   constructor(
     private paymentService: PaymentService,
-    private dialog: NbDialogService,
     private toastr: NbToastrService,
     private zone: NgZone,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -48,68 +29,61 @@ export class PaymentListComponent implements OnInit {
     this.loading = true;
     this.paymentService.getAll().subscribe({
       next: res => { this.payments = res; this.loading = false; },
-      error: () => { this.loading = false; this.toastr.danger('Failed load'); }
-    });
-  }
-  openPaymentDialog(payment?: any) {
-    setTimeout(() => {  // ensures <nb-layout> exists
-      this.dialog.open(PaymentFormComponent, { context: { payment } });
-    }, 0);
-  }
-  
-  edit(payment: PaymentView) {
-    this.dialog.open(PaymentFormComponent, { context: { payment } }).onClose.subscribe(saved => {
-      if (saved) this.load();
+      error: () => { this.loading = false; this.toastr.danger('Failed to load payments'); }
     });
   }
 
-  delete(payment: PaymentView) {
+  addPayment() {
+    this.router.navigate(['pages/transactions/payments/new']); // navigate to payment form page
+  }
+
+  editPayment(payment: PaymentView) {
+    this.router.navigate([`pages/transactions/payments/${payment.id}/edit`]); // navigate to payment form page with ID
+  }
+
+  deletePayment(payment: PaymentView) {
     if (!confirm('Delete payment?')) return;
     this.paymentService.delete(payment.id).subscribe({
       next: () => { this.toastr.success('Deleted'); this.load(); },
       error: () => this.toastr.danger('Delete failed')
     });
   }
+
   printReceipt(payment: any) {
     const doc = new jsPDF();
     let y = 20;
-  
-    // Institute heading
+
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('DaleView Hostel Management', 105, y, { align: 'center' });
-  
+    doc.text('Dale View Hostel', 105, y, { align: 'center' });
+
     y += 8;
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text('Payment Voucher', 105, y, { align: 'center' });
-  
+    doc.text('Payment Receipt', 105, y, { align: 'center' });
+
     y += 12;
-    // Payment details
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
     doc.text(`Receipt Date: ${new Date(payment.paymentDate).toLocaleDateString()}`, 20, y);
     doc.text(`Payment ID: ${payment.id}`, 150, y);
-  
+
     y += 6;
     doc.text(`Student ID: ${payment.studentId}`, 20, y);
     doc.text(`Booking ID: ${payment.bookingId || '-'}`, 150, y);
-  
+
     y += 6;
     doc.text(`Payment Mode: ${payment.paymentMode}`, 20, y);
     doc.text(`Reference: ${payment.referenceNumber || '-'}`, 150, y);
-  
+
     y += 6;
     doc.text(`Cash Denomination: ${payment.denominations || '-'}`, 20, y);
-  
-    // Separator line
+
     y += 6;
     doc.setDrawColor(0);
     doc.setLineWidth(0.5);
     doc.line(20, y, 190, y);
     y += 4;
-  
-    // Bill Adjustments Table
+
     if (payment.billAdjustments?.length) {
       autoTable(doc, {
         startY: y,
@@ -126,8 +100,7 @@ export class PaymentListComponent implements OnInit {
       });
       y = (doc as any).lastAutoTable.finalY + 6;
     }
-  
-    // Additional Charges Table
+
     if (payment.additionalCharges?.length) {
       autoTable(doc, {
         startY: y,
@@ -144,22 +117,18 @@ export class PaymentListComponent implements OnInit {
       });
       y = (doc as any).lastAutoTable.finalY + 10;
     }
-  
-    // Total Amount box
+
     doc.setFont('helvetica', 'bold');
     doc.setDrawColor(0);
     doc.setLineWidth(0.8);
-    doc.rect(20, y, 170, 10); // rectangle for total
+    doc.rect(20, y, 170, 10);
     doc.text(`Total Paid: ${payment.amount.toFixed(2)}`, 180, y + 7, { align: 'right' });
-  
-    // Footer
+
     y += 20;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.text('Thank you for your payment!', 105, y, { align: 'center' });
-  
+
     doc.save(`Payment_${payment.id}.pdf`);
   }
-  
-  
 }

@@ -14,6 +14,19 @@ export class StudentsFormComponent implements OnInit {
   isEdit = false;
   rooms: any[] = [];
 
+  // Relationship options
+  relationships: string[] = [
+    'Father',
+    'Mother',
+    'Husband',
+    'Wife',
+    'Brother',
+    'Sister',
+    'Uncle',
+    'Aunt',
+    'Guardian'
+  ];
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -29,11 +42,13 @@ export class StudentsFormComponent implements OnInit {
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phone: [''],
+      guardianAlternativeMobile: [''],
       dob: [''],
       gender: [''],
       address: [''],
       guardianName: [''],
       guardianPhone: [''],
+      relationship: [''],  // 👈 Added relationship
       admissionDate: [''],
       bloodGroup: [''],
       idProof: [''],
@@ -44,7 +59,7 @@ export class StudentsFormComponent implements OnInit {
     // Load room list for dropdown
     this.loadRooms();
 
-    // Load student if edit
+    // Load student if edit mode
     this.loadStudentIfEdit();
   }
 
@@ -73,16 +88,19 @@ export class StudentsFormComponent implements OnInit {
             address: data.address,
             guardianName: data.guardianName,
             guardianPhone: data.guardianPhone,
+            relationship: data.relationship,   // 👈 Added relationship
             admissionDate: this.formatDateForInput(data.admissionDate),
             bloodGroup: data.bloodGroup,
             idProof: data.idProof,
             roomId: data.roomId,
+            guardianAlternativeMobile:data.guardianAlternativeMobile
           });
         },
         error: (err) => console.error('Error loading student', err)
       });
     }
   }
+
   private formatDateForInput(date: string | Date): string | null {
     if (!date) return null;
     const d = new Date(date);

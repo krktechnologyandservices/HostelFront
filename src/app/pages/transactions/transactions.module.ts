@@ -36,6 +36,7 @@ import { BillsComponent } from './bills/bills.component';
 
 import { AdminApprovalComponent } from './bills/admin-approval/admin-approval.component';
 import { OfflinePaymentModalComponent } from './bills/offlinepaymentmodal/offlinepaymentmodal.component';
+import {DayBookComponent} from './daybook/daybook.component';
 
 
 @NgModule({
@@ -78,7 +79,9 @@ import { OfflinePaymentModalComponent } from './bills/offlinepaymentmodal/offlin
     BillsComponent,
 
     AdminApprovalComponent,
-    OfflinePaymentModalComponent
+    OfflinePaymentModalComponent,
+    DayBookComponent
+    
   
   ],
   

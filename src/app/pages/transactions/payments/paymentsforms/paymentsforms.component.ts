@@ -1,8 +1,34 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NbDialogRef, NbToastrService } from '@nebular/theme';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { PaymentService, PendingBill, PaymentCreateDto, BillAdjustmentDto, AdditionalChargeDto, ExpenseHead } from '../payments.service';
+import { PaymentService, PaymentCreateDto, PendingBill, ExpenseHead } from '../payments.service';
 import { StudentService } from '../../../layout/students/students.service';
+import { BookingService, Booking } from '../../booking/booking.service';
+
+interface BillAdjustment {
+  billId: number;
+  adjustedAmount: number;
+  remarks: string;
+}
+
+interface AdditionalCharge {
+  expenseHeadId: number;
+  amount: number;
+  remarks: string;
+}
+
+interface PaymentViewExtended {
+  id?: number;
+  studentId: number;
+  bookingId?: number | null;
+  paymentDate: string;
+  paymentMode: string;
+  amount: number;
+  paymentType: 'BILL' | 'ADVANCE' | 'OLD';
+  referenceNumber?: string;
+  remarks?: string;
+  billAdjustments?: BillAdjustment[];
+  additionalCharges?: AdditionalCharge[];
+}
 
 @Component({
   selector: 'app-payment-form',
@@ -10,25 +36,25 @@ import { StudentService } from '../../../layout/students/students.service';
   styleUrls: ['./paymentsforms.component.scss']
 })
 export class PaymentFormComponent implements OnInit {
-  @Input() payment?: any; // for edit
+  @Input() payment?: PaymentViewExtended;
   form!: FormGroup;
   students: any[] = [];
+  bookings: Booking[] = [];
   pendingBills: PendingBill[] = [];
   expenseHeads: ExpenseHead[] = [];
 
   constructor(
-    protected ref: NbDialogRef<PaymentFormComponent>,
     private fb: FormBuilder,
     private paymentService: PaymentService,
     private studentService: StudentService,
-    private toastr: NbToastrService
+    private bookingService: BookingService
   ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
       studentId: [this.payment?.studentId || null, Validators.required],
       bookingId: [this.payment?.bookingId || null],
-      paymentDate: [this.payment?.paymentDate ? this.payment.paymentDate : new Date().toISOString().substring(0,10), Validators.required],
+      paymentDate: [this.formatDate(this.payment?.paymentDate), Validators.required],
       paymentMode: [this.payment?.paymentMode || 'Cash', Validators.required],
       totalAmount: [this.payment?.amount || 0, [Validators.required, Validators.min(0.01)]],
       paymentType: [this.payment?.paymentType || 'BILL', Validators.required],
@@ -38,75 +64,80 @@ export class PaymentFormComponent implements OnInit {
       additionalCharges: this.fb.array([])
     });
 
-    // load students & expense heads
+    // Load students and expense heads
     this.studentService.getAll().subscribe(s => this.students = s);
     this.paymentService.getExpenseHeads().subscribe(h => this.expenseHeads = h);
 
-    // If editing, prefill adjustments and charges
-    if (this.payment) {
-      // Additional charges
-      if (this.payment.additionalCharges?.length) {
-        this.payment.additionalCharges.forEach(ch => {
-          this.additionalCharges.push(this.fb.group({
-            expenseHeadId: [ch.expenseHeadId, Validators.required],
-            amount: [ch.amount, [Validators.required, Validators.min(0.01)]],
-            remarks: [ch.remarks || '']
-          }));
-        });
-      }
+    // Load bookings and prefill payments if editing
+    if (this.payment?.studentId) {
+      this.loadBookings(this.payment.studentId, () => {
+        this.form.patchValue({ bookingId: this.payment?.bookingId });
+
+        // Load bill adjustments if type is BILL
+        if (this.payment?.paymentType === 'BILL') {
+          this.loadPendingBills(this.payment.studentId, true);
+        }
+
+        // Always load additional charges if any
+        if (this.payment?.additionalCharges?.length) {
+          this.payment.additionalCharges.forEach(ch => {
+            this.additionalCharges.push(this.fb.group({
+              expenseHeadId: [ch.expenseHeadId, Validators.required],
+              amount: [ch.amount, [Validators.required, Validators.min(0.01)]],
+              remarks: [ch.remarks || '']
+            }));
+          });
+        }
+      });
     }
 
-    // on student change or type change, load pending bills
-    this.form.get('studentId')?.valueChanges.subscribe(sid => {
-      if (this.form.get('paymentType')?.value === 'BILL' && sid) {
-        this.loadPendingBills(sid);
-      }
-    });
-
-    this.form.get('paymentType')?.valueChanges.subscribe(t => {
-      const sid = this.form.get('studentId')?.value;
-      if (t === 'BILL' && sid) {
-        this.loadPendingBills(sid);
+    // React to student selection changes
+    this.form.get('studentId')?.valueChanges.subscribe(studentId => {
+      if (studentId) {
+        this.loadBookings(studentId);
+        if (this.form.get('paymentType')?.value === 'BILL') this.loadPendingBills(studentId);
       } else {
-        this.clearBillAdjustments();
+        this.bookings = [];
+        this.form.patchValue({ bookingId: null });
       }
     });
 
-    this.form.get('totalAmount')?.valueChanges.subscribe(_ => this.autoAllocate());
+    // React to payment type changes
+    this.form.get('paymentType')?.valueChanges.subscribe(type => {
+      const studentId = this.form.get('studentId')?.value;
+      if (type === 'BILL' && studentId) this.loadPendingBills(studentId);
+      else this.clearBillAdjustments();
+    });
+
+    this.form.get('totalAmount')?.valueChanges.subscribe(() => this.autoAllocate());
   }
 
   get billAdjArray() { return this.form.get('billAdjustments') as FormArray; }
   get additionalCharges() { return this.form.get('additionalCharges') as FormArray; }
 
-  loadPendingBills(studentId: number) {
+  loadBookings(studentId: number, callback?: () => void) {
+    this.bookingService.getByStudent(studentId).subscribe(b => {
+      this.bookings = b;
+      if (!b.some(x => x.id === this.form.value.bookingId)) this.form.patchValue({ bookingId: null });
+      if (callback) callback();
+    });
+  }
+
+  loadPendingBills(studentId: number, prefill: boolean = false) {
     this.paymentService.getPendingBills(studentId).subscribe(bills => {
       this.pendingBills = bills;
+      this.clearBillAdjustments();
 
-      // Map existing adjustments for edit
-      const existingAdjMap = new Map<number, any>();
-      if (this.payment?.billAdjustments?.length) {
-        this.payment.billAdjustments.forEach((adj: any) => existingAdjMap.set(adj.billId, adj));
+      const existingAdjMap = new Map<number, BillAdjustment>();
+      if (prefill && this.payment?.billAdjustments?.length) {
+        this.payment.billAdjustments.forEach(adj => existingAdjMap.set(adj.billId, adj));
       }
 
-      // Merge pending bills with existing adjustments
-      const mergedBills: PendingBill[] = [...bills];
-      existingAdjMap.forEach((adj, billId) => {
-        if (!bills.some(b => b.billId === billId)) {
-          mergedBills.push({
-            billId: adj.billId,
-            period: adj.period || '',
-            billAmount: adj.billAmount || 0,
-            balance: adj.adjustedAmount || 0,
-            paidAmount: 0 // required for PendingBill type
-          });
-        }
-      });
-
-      this.clearBillAdjustments();
-      mergedBills.forEach(b => {
+      bills.forEach(b => {
         const adjAmount = existingAdjMap.get(b.billId)?.adjustedAmount || 0;
         this.billAdjArray.push(this.fb.group({
           billId: [b.billId],
+          roomNumber: [b.roomNumber || '-'],
           period: [b.period],
           billAmount: [b.billAmount],
           balance: [b.balance],
@@ -124,29 +155,21 @@ export class PaymentFormComponent implements OnInit {
 
   autoAllocate() {
     if (this.form.get('paymentType')?.value !== 'BILL') return;
-    const total = Number(this.form.get('totalAmount')?.value) || 0;
-    const totalCharges = this.additionalCharges.controls.reduce((s, c) => s + Number(c.get('amount')?.value || 0), 0);
-    let remaining = total - totalCharges;
+
+    const total = Number(this.form.get('totalAmount')?.value || 0);
+    const charges = this.additionalCharges.controls.reduce((sum, c) => sum + Number(c.get('amount')?.value || 0), 0);
+    let remaining = total - charges;
     if (remaining < 0) remaining = 0;
 
-    for (let i = 0; i < this.billAdjArray.length; i++) {
-      const ctrl = this.billAdjArray.at(i);
-      const balance = Number(ctrl.get('balance')?.value) || 0;
+    this.billAdjArray.controls.forEach(ctrl => {
+      const balance = Number(ctrl.get('balance')?.value || 0);
       const adj = Math.min(balance, remaining);
       ctrl.get('adjustedAmount')?.setValue(adj, { emitEvent: false });
       remaining -= adj;
-    }
+    });
   }
 
-  onManualAdjustChanged() {
-    const total = Number(this.form.get('totalAmount')?.value) || 0;
-    const charges = this.additionalCharges.controls.reduce((s, c) => s + Number(c.get('amount')?.value || 0), 0);
-    const totalAdjusted = this.billAdjArray.controls.reduce((s, c) => s + Number(c.get('adjustedAmount')?.value || 0), 0) + charges;
-    if (totalAdjusted > total) {
-      this.toastr.warning('Sum of adjustments + charges cannot exceed total paying amount');
-      this.autoAllocate();
-    }
-  }
+  onManualAdjustChanged() { this.autoAllocate(); }
 
   addCharge() {
     this.additionalCharges.push(this.fb.group({
@@ -162,7 +185,7 @@ export class PaymentFormComponent implements OnInit {
   }
 
   save() {
-    if (this.form.invalid) { this.toastr.warning('Please complete required fields'); return; }
+    if (this.form.invalid) { alert('Please complete required fields'); return; }
 
     const dto: PaymentCreateDto = {
       studentId: Number(this.form.value.studentId),
@@ -173,33 +196,29 @@ export class PaymentFormComponent implements OnInit {
       referenceNumber: this.form.value.referenceNumber,
       remarks: this.form.value.remarks,
       paymentType: this.form.value.paymentType,
-      billAdjustments: [],
-      additionalCharges: []
+      billAdjustments: this.billAdjArray.controls
+        .map(c => ({ billId: Number(c.value.billId), adjustedAmount: Number(c.value.adjustedAmount), remarks: '' }))
+        .filter(c => c.adjustedAmount > 0),
+      additionalCharges: this.additionalCharges.controls
+        .map(c => ({ expenseHeadId: Number(c.value.expenseHeadId), amount: Number(c.value.amount), remarks: c.value.remarks }))
+        .filter(c => c.amount > 0)
     };
 
-    if (dto.paymentType === 'BILL') {
-      for (let c of this.billAdjArray.controls) {
-        const adj = Number(c.get('adjustedAmount')?.value || 0);
-        if (adj > 0) {
-          dto.billAdjustments?.push({ billId: Number(c.get('billId')?.value), adjustedAmount: adj, remarks: '' });
-        }
-      }
-    }
+    const request$ = this.payment?.id
+      ? this.paymentService.update(this.payment.id, dto)
+      : this.paymentService.create(dto);
 
-    for (let c of this.additionalCharges.controls) {
-      const ehId = Number(c.get('expenseHeadId')?.value);
-      const amt = Number(c.get('amount')?.value);
-      if (ehId && amt > 0) dto.additionalCharges?.push({ expenseHeadId: ehId, amount: amt, remarks: c.get('remarks')?.value });
-    }
-
-    const sumAdj = (dto.billAdjustments || []).reduce((s,a)=>s+a.adjustedAmount,0) + (dto.additionalCharges || []).reduce((s,ch)=>s+ch.amount,0);
-    if (sumAdj > dto.totalAmount) { this.toastr.danger('Adjusted amounts + charges exceed total payment'); return; }
-
-    this.paymentService.create(dto).subscribe({
-      next: () => { this.toastr.success('Payment saved'); this.ref.close(true); },
-      error: (err) => { this.toastr.danger('Save failed'); console.error(err); }
+    request$.subscribe({
+      next: () => alert(`Payment ${this.payment?.id ? 'updated' : 'saved'} successfully`),
+      error: err => { console.error(err); alert('Save failed'); }
     });
   }
 
-  cancel() { this.ref.close(false); }
+  cancel() { window.history.back(); }
+
+  private formatDate(dateStr?: string) {
+    if (!dateStr) return new Date().toISOString().substring(0, 10);
+    const d = new Date(dateStr);
+    return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`;
+  }
 }

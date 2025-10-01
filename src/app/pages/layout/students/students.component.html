@@ -1,5 +1,6 @@
 <nb-card>
-  <nb-card-header>
+  <!-- Header with Add Button -->
+  <nb-card-header class="header-section">
     <span>Students</span>
     <button nbButton status="success" size="small" (click)="router.navigate(['pages/master/students/add'])" class="add-button">
       Add Student
@@ -16,83 +17,47 @@
       </div>
     </div>
 
-    <!-- Desktop Table View
-    <div class="view-container desktop-view">
-      <div class="table-wrapper">
-        <table class="students-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>DOB</th>
-              <th>Gender</th>
-              <th>Guardian</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let student of filteredStudents">
-              <td><strong>{{student.fullName}}</strong></td>
-              <td>{{student.email}}</td>
-              <td>{{student.phone}}</td>
-              <td>{{student.dob | date:'shortDate'}}</td>
-              <td>
-                <span class="gender-badge" [class]="student.gender?.toLowerCase()">
-                  {{student.gender}}
-                </span>
-              </td>
-              <td>
-                <div>{{student.guardianName}}</div>
-                <small class="text-muted">{{student.guardianPhone}}</small>
-              </td>
-              <td class="actions">
-                <button nbButton status="primary" size="tiny" (click)="edit(student)">Edit</button>
-                <button nbButton status="danger" size="tiny" (click)="delete(student)">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div> -->
+    <!-- Students List -->
+    <div class="student-cards">
+      <div class="student-card" *ngFor="let student of filteredStudents">
 
-    <!-- Mobile Card View -->
-    <div class="view-container mobile-view">
-      <div class="student-cards">
-        <div class="student-card" *ngFor="let student of filteredStudents">
-          <div class="card-header">
+        <div class="card-grid">
+          <!-- Left Column: Student & Guardian Info -->
+          <div class="student-info-col">
             <h4>{{student.fullName}}</h4>
-            <span class="gender-badge" [class]="student.gender?.toLowerCase()">
-              {{student.gender}}
-            </span>
-          </div>
-          <div class="card-content">
-            <div class="info-item">
-              <label>Email:</label>
-              <span>{{student.email}}</span>
+            <div class="info-item"><label>Email:</label> <span>{{student.email}}</span></div>
+            <div class="info-item"><label>Phone:</label> <span>{{student.phone}}</span></div>
+            <div class="info-item"><label>DOB:</label> <span>{{student.dob | date:'shortDate'}}</span></div>
+            <div class="info-item"><label>Guardian:</label> <span>{{student.guardianName}}</span></div>
+            <div class="info-item"><label>Guardian Phone:</label> <span>{{student.guardianPhone}}</span></div>
+            <div class="info-item"><label>Guardian Alt:</label> <span>{{student.guardianAlternativeMobile}}</span></div>
+
+            <!-- Action Buttons -->
+            <div class="card-actions">
+              <button nbButton status="primary" size="tiny" (click)="edit(student)">Edit</button>
+              <button nbButton status="danger" size="tiny" (click)="delete(student)">Delete</button>
+              <button nbButton status="info" size="tiny" (click)="viewStudent(student)">View</button>
             </div>
-            <div class="info-item">
-              <label>Phone:</label>
-              <span>{{student.phone}}</span>
-            </div>
-            <div class="info-item">
-              <label>DOB:</label>
-              <span>{{student.dob | date:'shortDate'}}</span>
-            </div>
-            <div class="info-item">
-              <label>Guardian:</label>
-              <span>{{student.guardianName}}</span>
-            </div>
-            <div class="info-item">
-              <label>Guardian Phone:</label>
-              <span>{{student.guardianPhone}}</span>
+
+            <!-- Photo Upload Section (visible on view) -->
+            <div *ngIf="viewingStudent?.studentId === student.studentId" class="photo-actions">
+              <input type="file" (change)="onPhotoSelected($event, student)" accept="image/*" />
+              <button *ngIf="selectedPhotos[student.studentId!]" nbButton status="info" size="tiny" (click)="uploadPhoto(student)">Upload</button>
+              <button *ngIf="student.photoUrl" nbButton status="danger" size="tiny" (click)="removePhoto(student)">Remove</button>
             </div>
           </div>
-          <div class="card-actions">
-            <button nbButton status="primary" size="tiny" (click)="edit(student)">Edit</button>
-            <button nbButton status="danger" size="tiny" (click)="delete(student)">Delete</button>
+
+          <!-- Right Column: Fixed Square Photo -->
+          <div class="student-photo-col">
+            <div class="photo-frame" (click)="enlargePhoto(student.photoUrl)" [title]="'Click to enlarge'">
+              <img *ngIf="student.photoUrl; else noPhoto" [src]="student.photoUrl" class="student-photo">
+              <ng-template #noPhoto>
+                <div class="photo-placeholder">No Photo</div>
+              </ng-template>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -101,5 +66,11 @@
       <h3>No students found</h3>
       <p *ngIf="searchQuery">Try adjusting your search criteria</p>
     </div>
+
   </nb-card-body>
 </nb-card>
+
+<!-- Optional: Modal or Lightbox for Enlarged Photo -->
+<nb-dialog *ngIf="enlargedPhotoUrl" (close)="enlargedPhotoUrl = null">
+  <img [src]="enlargedPhotoUrl" style="width:100%; max-width:400px; border-radius:8px;" />
+</nb-dialog>

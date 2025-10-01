@@ -55,6 +55,23 @@
         <input nbInput fullWidth formControlName="guardianPhone" placeholder="Enter guardian phone">
       </div>
 
+        <!-- Phone -->
+        <div class="form-group">
+          <label>Guardian Alternative Phone</label>
+          <input nbInput fullWidth type="tel" formControlName="guardianAlternativeMobile" placeholder="Enter phone number">
+        </div>
+
+
+      <!-- Relationship -->
+      <div class="form-group">
+        <label>Relationship</label>
+        <nb-select fullWidth placeholder="Select Relationship" formControlName="relationship">
+          <nb-option *ngFor="let relation of relationships" [value]="relation">
+            {{ relation }}
+          </nb-option>
+        </nb-select>
+      </div>
+
       <!-- Admission Date -->
       <div class="form-group">
         <label>Admission Date</label>
@@ -81,27 +98,6 @@
         <label>ID Proof</label>
         <input nbInput fullWidth formControlName="idProof" placeholder="Enter ID Proof (e.g. Aadhaar)">
       </div>
-
-      <!-- Room Assignment -->
-      <!-- <div class="form-group">
-        <label>Assigned Room</label>
-        <nb-select fullWidth placeholder="Select Room" formControlName="roomId">
-          <nb-option *ngFor="let room of rooms" [value]="room.id">
-            {{ room.roomNumber }} ({{ room.type }})
-          </nb-option>
-        </nb-select>
-      </div> -->
-
-      <!-- Billing Mode -->
-      <!-- <div class="form-group">
-        <label>Billing Mode</label>
-        <nb-select fullWidth formControlName="billingMode" placeholder="Select Billing Mode">
-          <nb-option value="Monthly">Monthly</nb-option>
-          <nb-option value="Quarterly">Quarterly</nb-option>
-          <nb-option value="Half-Yearly">Half-Yearly</nb-option>
-          <nb-option value="Annually">Annually</nb-option>
-        </nb-select>
-      </div> -->
 
       <!-- Buttons -->
       <div style="margin-top: 15px;">

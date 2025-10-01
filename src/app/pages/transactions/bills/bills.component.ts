@@ -88,19 +88,19 @@ export class BillsComponent implements OnInit {
       case 'approved': return 'primary';
       case 'rejected': return 'danger';
       case 'modified': return 'info';
-      case 'deleted': return 'danger';
+      case 'cancelled': return 'danger';
       default: return 'basic';
     }
   }
   deleteBill(bill: any) {
-    if (confirm(`Are you sure you want to delete Bill #${bill.id}?`)) {
+    if (confirm(`Are you sure you want to cancel Bill #${bill.id}?`)) {
       this.billingService.softDeleteBill(bill.id).subscribe({
         next: () => {
-          bill.status = 'Deleted'; // update UI immediately
+          bill.status = 'Cancelled'; // update UI immediately
         },
         error: (err) => {
-          console.error('Delete failed', err);
-          alert('Delete failed, please try again.');
+          console.error('Cancellation failed', err);
+          alert('cancellation failed, please try again.');
         }
       });
     }

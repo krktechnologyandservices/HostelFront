@@ -47,4 +47,11 @@ export class BookingService {
   updateVocation(id: number, data: { vocationDate?: string; status: string }) {
     return this.http.put(`${this.api}/${id}/vocation`, data);
   }
+
+  getByStudent(studentId: number): Observable<Booking[]> {
+    return this.http.get<Booking[]>(`${this.api}/by-student?studentId=${studentId}`);
+
+  }
+
+  
 }
