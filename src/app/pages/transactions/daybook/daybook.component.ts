@@ -14,15 +14,30 @@ export class DayBookComponent implements OnInit {
   roomList = [];      // Load from API
   studentList = [];   // Load from API
 
-  constructor(private fb: FormBuilder, private service: DayBookService) {}
+  constructor(private fb: FormBuilder, private service: DayBookService) {
+
+
+ 
+  }
 
   ngOnInit(): void {
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months start at 0
+    const dd = String(today.getDate()).padStart(2, '0');
+  
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+
+
+
     this.filterForm = this.fb.group({
       rooms: [[]],
       students: [[]],
       genders: [[]],
-      fromDate: [null],
-      toDate: [null]
+      fromDate: [todayStr],
+      toDate: [todayStr]
     });
 
     this.loadFilters();

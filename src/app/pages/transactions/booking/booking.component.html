@@ -36,10 +36,10 @@
           <td>{{ b.status }}</td>
           <td>{{ b.vocationDate ? (b.vocationDate | date:'shortDate') : '-' }}</td>
           <td>
-            <button nbButton size="tiny" status="info" (click)="editBooking(b)">Edit</button>
-            <button nbButton size="tiny" status="warning" (click)="openVocationModal(b)">Vocate</button>
-            <button nbButton size="tiny" status="danger" (click)="deleteBooking(b)">Cancel</button>
-            <button nbButton size="tiny" status="success" *ngIf="b.status==='Pending'" (click)="pay(b)">Pay</button>
+            <button nbButton size="tiny" status="info" (click)="editBooking(b)" *ngIf="b.status!='Cancelled'">Edit</button>
+            <button nbButton size="tiny" status="warning" (click)="openVocationModal(b)" *ngIf="b.status!='Cancelled'">Vocate</button>
+            <button nbButton size="tiny" status="danger" (click)="deleteBooking(b)" *ngIf="b.status!='Cancelled'">Cancel</button>
+            
           </td>
         </tr>
       </tbody>

@@ -6,6 +6,7 @@ import { PaymentFormComponent } from './payments/paymentsforms/paymentsforms.com
 import { BillsComponent } from './bills/bills.component';
 import { PaymentListComponent } from './payments/payments.component';
 import { DayBookComponent } from './daybook/daybook.component';
+import {PaymentRegisterComponent} from './paymentregister/paymentregister.component'
 const routes: Routes = [
     
   { path: 'bookings', component: BookingComponent },
@@ -17,6 +18,8 @@ const routes: Routes = [
   { path: 'payments/new', component: PaymentFormComponent },      // New payment
   { path: 'payments/:id/edit', component: PaymentFormComponent }, // Edit payment
   { path: 'daybookview', component: DayBookComponent }, // Edit payment
+  { path: 'paymentregister', component: PaymentRegisterComponent }, // Edit payment
+  
   
 ]
 

@@ -51,6 +51,7 @@ export class StudentsFormComponent implements OnInit {
       relationship: [''],  // 👈 Added relationship
       admissionDate: [''],
       bloodGroup: [''],
+      courseName: [''],
       idProof: [''],
       roomId: [null],
       billingMode: [''],
@@ -91,6 +92,7 @@ export class StudentsFormComponent implements OnInit {
             relationship: data.relationship,   // 👈 Added relationship
             admissionDate: this.formatDateForInput(data.admissionDate),
             bloodGroup: data.bloodGroup,
+            courseName: data.courseName  || '',
             idProof: data.idProof,
             roomId: data.roomId,
             guardianAlternativeMobile:data.guardianAlternativeMobile

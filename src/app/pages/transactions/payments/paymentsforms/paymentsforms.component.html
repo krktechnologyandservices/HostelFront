@@ -95,7 +95,7 @@
     </div>
 
     <!-- Additional Charges -->
-    <div class="mt-3">
+    <div class="mt-3" *ngIf="form.get('paymentType')?.value === 'BILL'">
       <nb-card>
         <nb-card-header>
           Additional Charges

@@ -65,6 +65,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
         link: '/pages/transactions/payments',
       },
       {
+        title: 'Payment Register',
+        pathMatch: 'prefix',
+        link: '/pages/transactions/paymentregister',
+      },
+      {
       title: 'Daybook view',
       pathMatch: 'prefix',
       link: '/pages/transactions/daybookview',

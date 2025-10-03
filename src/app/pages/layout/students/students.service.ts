@@ -19,6 +19,7 @@ export interface Student {
    relationship:string;
    roomId :string;
    photoUrl:string;
+   courseName:string;
 }
 
 @Injectable({ providedIn: 'root' })

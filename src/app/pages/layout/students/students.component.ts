@@ -37,7 +37,8 @@ export class StudentsComponent implements OnInit {
       this.filteredStudents = this.students.filter(s =>
         (s.fullName?.toLowerCase().includes(q)) ||
         (s.email?.toLowerCase().includes(q)) ||
-        (s.phone?.toLowerCase().includes(q))
+        (s.phone?.toLowerCase().includes(q)) ||
+        (s.courseName?.toLowerCase().includes(q))
       );
     }
   }

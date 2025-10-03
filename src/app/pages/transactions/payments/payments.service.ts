@@ -48,7 +48,44 @@ export interface PaymentView {
   referenceNumber?: string;
   remarks?: string;
   paymentType: string;
+  studentName:string;
+  roomNo:String;
+  status:string;
 }
+
+export interface PaymentRegisterReport {
+  paymentId: number;
+  paymentDate: string;      // ISO string or Date
+  studentName: string;
+  roomNo?: string;
+  paymentType: string;
+  paymentMode: string;
+  paymentAmount: number;
+  paymentStatus: string;
+
+  roomRents?: RoomRentItem[];
+  otherCharges?: OtherChargeItem[];
+  advances?: AdvanceItem[];
+}
+
+export interface RoomRentItem {
+  billNo: number;
+  month: string;           // e.g., 'Jun', 'Jul'
+  amount: number;
+}
+
+export interface OtherChargeItem {
+  particulars: string;     // e.g., 'Fine'
+  amount: number;
+}
+
+export interface AdvanceItem {
+  amount: number;
+  createdAt: string;       // ISO string or Date
+}
+
+
+
 
 export interface ExpenseHead {
   id: number;
@@ -115,4 +152,13 @@ export class PaymentService {
   delete(paymentId: number): Observable<any> {
     return this.http.delete(`${this.api}/${paymentId}`);
   }
+
+  UpdateVerification(paymentId: number): Observable<any> {
+    return this.http.put(`${this.api}/${paymentId}`,paymentId);
+  }
+  getReceipt(paymentId: number): Observable<PaymentRegisterReport> {
+    return this.http.get<PaymentRegisterReport>(`${this.api}/${paymentId}/receipt`);
+  }
+
+
 }
