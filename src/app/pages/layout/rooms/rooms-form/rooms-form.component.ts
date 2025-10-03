@@ -12,7 +12,7 @@ export class RoomFormComponent implements OnInit {
   roomId?: number;
   isEdit = false;
   //periods = ['Monthly', 'Quarterly', 'HalfYearly', 'Yearly'];
-   periods = ['Monthly',  'Yearly'];
+   periods = ['Monthly',  'Yearly','Guest'];
   constructor(
     private fb: FormBuilder,
     private roomService: RoomService,
