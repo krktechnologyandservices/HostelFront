@@ -11,7 +11,7 @@
             <label>Student</label>
             <nb-select fullWidth placeholder="Select Student" formControlName="studentId">
               <nb-option *ngFor="let s of students" [value]="s.studentId">
-                {{ s.name }} ({{ s.email }})
+                {{ s.fullName }}'-'{{ s.phone }} '-' ({{ s.email }})
               </nb-option>
             </nb-select>
             <div *ngIf="bookingForm.get('studentId')?.touched && bookingForm.get('studentId')?.hasError('required')" class="text-danger">
