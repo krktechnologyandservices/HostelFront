@@ -154,7 +154,7 @@ export class PaymentService {
   }
 
   UpdateVerification(paymentId: number): Observable<any> {
-    return this.http.put(`${this.api}/${paymentId}`,paymentId);
+    return this.http.put(`${this.api}/${paymentId}/Verification`,paymentId);
   }
   getReceipt(paymentId: number): Observable<PaymentRegisterReport> {
     return this.http.get<PaymentRegisterReport>(`${this.api}/${paymentId}/receipt`);

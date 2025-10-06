@@ -47,9 +47,9 @@ export class PaymentListComponent implements OnInit {
   UpdateVerficaition(paymentId: number)
   {
     if (!confirm('is the Payment Verfied?')) return;
-    this.paymentService.delete(paymentId).subscribe({
-      next: () => { this.toastr.success('Cancelled'); this.load(); },
-      error: () => this.toastr.danger('Cancellation failed')
+    this.paymentService.UpdateVerification(paymentId).subscribe({
+      next: () => { this.toastr.success('Update was successfull'); this.load(); },
+      error: () => this.toastr.danger('Update failed')
     });
   }
 

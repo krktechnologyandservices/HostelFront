@@ -22,7 +22,7 @@
           <button nbButton status="info" size="tiny" (click)="editPayment(p)"  *ngIf="1==2">Edit</button>
           <button nbButton status="danger" size="tiny" (click)="deletePayment(p)"  *ngIf="p.status!='Cancelled'">Cancel</button>
           <button nbButton status="primary" size="tiny" (click)="printReceipt(p)" *ngIf="p.status!='Cancelled'">Print</button>
-          <button nbButton status="primary" size="tiny" (click)="UpdateVerficaition(p)" *ngIf="p.status=='Verification' ">Verified</button>
+          <button nbButton status="primary" size="tiny" (click)="UpdateVerficaition(p.id)" *ngIf="p.status=='Verification' ">Verified</button>
         </nb-card-footer>
       </nb-card>
     </div>

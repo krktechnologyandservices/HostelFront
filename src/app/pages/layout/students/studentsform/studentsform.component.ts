@@ -40,8 +40,9 @@ export class StudentsFormComponent implements OnInit {
     this.studentForm = this.fb.group({
       studentId: [null],
       fullName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      phone: [''],
+      //email: ['' ],
+       email: ['', Validators.email],
+      phone: ['', Validators.required],
       guardianAlternativeMobile: [''],
       dob: [''],
       gender: [''],
@@ -55,6 +56,8 @@ export class StudentsFormComponent implements OnInit {
       idProof: [''],
       roomId: [null],
       billingMode: [''],
+      roomNO: [''],
+
     });
 
     // Load room list for dropdown
@@ -113,7 +116,13 @@ export class StudentsFormComponent implements OnInit {
   
   // Save or update student
   save(): void {
-    if (this.studentForm.invalid) return;
+    if (this.studentForm.invalid){ console.warn('❌ Form is invalid');
+    console.log(this.studentForm.value);       // Show current values
+    console.log(this.studentForm.errors);      // Show top-level form errors (usually null)
+    console.log(this.studentForm.status);      // VALID or INVALID
+    this.logInvalidControls();                 // 👈 Custom helper below
+    return;
+  }
 
     const student: Student = this.studentForm.value;
 
@@ -129,6 +138,16 @@ export class StudentsFormComponent implements OnInit {
       });
     }
   }
+
+  private logInvalidControls(): void {
+    Object.keys(this.studentForm.controls).forEach(key => {
+      const control = this.studentForm.get(key);
+      if (control && control.invalid) {
+        console.warn(`Field "${key}" is invalid.`, control.errors);
+      }
+    });
+  }
+  
 
   // Cancel and navigate back
   cancel(): void {
