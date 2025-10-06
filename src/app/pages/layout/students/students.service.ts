@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient ,HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import {formatDate} from '@angular/common';
 import { environment } from '../../../../environments/environment';
 export interface Student {
   studentId?: number;
@@ -20,7 +21,31 @@ export interface Student {
    roomId :string;
    photoUrl:string;
    courseName:string;
+   roomNo:string;
 }
+
+export interface LedgerItem {
+  date: string;
+  description: string;
+  type: 'Bill' | 'Payment' | 'Adjustment' | 'Advance';
+  amount: number;
+}
+
+
+export interface LedgerEntry {
+  date: string;
+  type: 'Bill' | 'Payment' | 'Adjustment' | 'Advance';
+  description: string;
+  amount: number;
+  debit?: number;
+  credit?: number;
+  particulars?: string; // For showing bill adjustment or additional payment breakdown
+  balance?:number;
+  roomNo?:string;
+}
+
+
+
 
 @Injectable({ providedIn: 'root' })
 export class StudentService {
@@ -48,6 +73,15 @@ export class StudentService {
   getPhoto(studentId: number): Observable<Blob> {
     return this.http.get(`${this.api}/${studentId}/photo`, { responseType: 'blob' });
   }
+
+  getLedger(studentId: number, fromDate?: Date, toDate?: Date) {
+    let params: any = {};
+    if (fromDate) params.fromDate = fromDate.toISOString(); // 2025-10-05T00:00:00.000Z
+    if (toDate) params.toDate = toDate.toISOString();
+    return this.http.get<LedgerEntry[]>(`${this.api}/${studentId}/ledger`, { params });
+  }
+  
+  
 
 
 }

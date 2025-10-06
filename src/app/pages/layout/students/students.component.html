@@ -1,14 +1,15 @@
 <nb-card>
-  <!-- Header with Add Button -->
   <nb-card-header class="header-section">
     <span>Students</span>
-    <button nbButton status="success" size="small" (click)="router.navigate(['pages/master/students/add'])" class="add-button">
+    <button nbButton status="success" size="small"
+      (click)="router.navigate(['pages/master/students/add'])"
+      class="add-button">
       Add Student
     </button>
   </nb-card-header>
 
   <nb-card-body>
-    <!-- Search Section -->
+    <!-- 🔍 Search Section -->
     <div class="search-section">
       <input nbInput placeholder="Search by name, email, phone" [(ngModel)]="searchQuery" class="search-input">
       <div class="search-buttons">
@@ -17,61 +18,89 @@
       </div>
     </div>
 
-    <!-- Students List -->
-    <div class="student-cards">
-      <div class="student-card" *ngFor="let student of filteredStudents">
+    <div class="ledger-wrapper">
+      <!-- 🧍 Student List -->
+      <div class="students-col">
+        <div class="student-card" *ngFor="let student of filteredStudents">
+          <div class="card-grid">
+            <div class="student-info-col">
+              <h4>{{student.fullName}}</h4>
+              <div class="info-item"><label>Course:</label> <span>{{student.courseName}}</span></div>
+              <div class="info-item"><label>Email:</label> <span>{{student.email}}</span></div>
+              <div class="info-item"><label>Phone:</label> <span>{{student.phone}}</span></div>
 
-        <div class="card-grid">
-          <!-- Left Column: Student & Guardian Info -->
-          <div class="student-info-col">
-            <h4>{{student.fullName}}</h4>
-            <div class="info-item"><label>Course Name:</label> <span>{{student.courseName}}</span></div>
-            <div class="info-item"><label>Email:</label> <span>{{student.email}}</span></div>
-            <div class="info-item"><label>Phone:</label> <span>{{student.phone}}</span></div>
-            <div class="info-item"><label>DOB:</label> <span>{{student.dob | date:'shortDate'}}</span></div>
-            <div class="info-item"><label>Guardian:</label> <span>{{student.guardianName}}</span></div>
-            <div class="info-item"><label>Guardian Phone:</label> <span>{{student.guardianPhone}}</span></div>
-            <div class="info-item"><label>Guardian Alt:</label> <span>{{student.guardianAlternativeMobile}}</span></div>
-
-            <!-- Action Buttons -->
-            <div class="card-actions">
-              <button nbButton status="primary" size="tiny" (click)="edit(student)">Edit</button>
-              <button nbButton status="danger" size="tiny" (click)="delete(student)">Delete</button>
-              <button nbButton status="info" size="tiny" (click)="viewStudent(student)">View</button>
+              <div class="card-actions">
+                <button nbButton status="primary" size="tiny" (click)="edit(student); $event.stopPropagation()">Edit</button>
+                <button nbButton status="danger" size="tiny" (click)="delete(student); $event.stopPropagation()">Delete</button>
+                <button nbButton status="info" size="tiny" (click)="loadLedger(student); $event.stopPropagation()">View Ledger</button>
+              </div>
             </div>
 
-            <!-- Photo Upload Section (visible on view) -->
-            <div *ngIf="viewingStudent?.studentId === student.studentId" class="photo-actions">
-              <input type="file" (change)="onPhotoSelected($event, student)" accept="image/*" />
-              <button *ngIf="selectedPhotos[student.studentId!]" nbButton status="info" size="tiny" (click)="uploadPhoto(student)">Upload</button>
-              <button *ngIf="student.photoUrl" nbButton status="danger" size="tiny" (click)="removePhoto(student)">Remove</button>
-            </div>
-          </div>
-
-          <!-- Right Column: Fixed Square Photo -->
-          <div class="student-photo-col">
-            <div class="photo-frame" (click)="enlargePhoto(student.photoUrl)" [title]="'Click to enlarge'">
-              <img *ngIf="student.photoUrl; else noPhoto" [src]="student.photoUrl" class="student-photo">
-              <ng-template #noPhoto>
-                <div class="photo-placeholder">No Photo</div>
-              </ng-template>
+            <div class="student-photo-col">
+              <div class="photo-frame"
+                   (click)="enlargePhoto(student); $event.stopPropagation()"
+                   [title]="'Click to enlarge'">
+                <img *ngIf="studentPhotos[student.studentId]; else noPhoto"
+                     [src]="studentPhotos[student.studentId]"
+                     class="student-photo">
+                <ng-template #noPhoto>
+                  <div class="photo-placeholder">Click to view</div>
+                </ng-template>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
+      <!-- 📜 Ledger View -->
+      <div class="ledger-col" *ngIf="ledgerStudent">
+        <h4>Ledger - {{ledgerStudent.fullName}}</h4>
+
+        <div class="date-filter">
+          <label>From:</label>
+          <input type="date" [(ngModel)]="fromDate">
+          <label>To:</label>
+          <input type="date" [(ngModel)]="toDate">
+          <button nbButton status="info" size="tiny" (click)="onDateChange()">Load</button>
+          <button nbButton status="success" size="tiny" (click)="exportLedgerPdf()">Export PDF</button>
+        </div>
+
+        <div class="ledger-table" *ngIf="ledgerEntries.length; else noLedger">
+          <div class="ledger-row ledger-header">
+            <div>Date</div>
+            <div>Type</div>
+            <div>Particulars</div>
+            <div>Debit</div>
+            <div>Credit</div>
+            <div>Balance</div>
+          </div>
+
+          <div class="ledger-row"
+               *ngFor="let entry of ledgerEntries"
+               [ngClass]="{
+                 'type-payment': entry.type === 'PAYMENT',
+                 'type-adjustment': entry.type === 'PAYMENT_ADJUSTMENT',
+                 'type-charge': entry.type === 'ADDITIONAL_CHARGE',
+                 'type-advance': entry.type === 'ADVANCE_PAYMENT'
+               }">
+            <div>{{entry.date | date:'dd-MMM-yyyy'}}</div>
+            <div>{{entry.type}}</div>
+            <div>{{entry.particulars || entry.description}}</div>
+            <div>{{entry.debit ? (entry.debit | number:'1.2-2') : ''}}</div>
+            <div>{{entry.credit ? (entry.credit | number:'1.2-2') : ''}}</div>
+            <div>{{entry.balance ? (entry.balance | number:'1.2-2') : ''}}</div>
+          </div>
+        </div>
+
+        <ng-template #noLedger>
+          <div style="text-align:center; margin-top:20px;">No ledger data available.</div>
+        </ng-template>
       </div>
     </div>
-
-    <!-- Empty State -->
-    <div *ngIf="filteredStudents.length === 0" class="no-data">
-      <h3>No students found</h3>
-      <p *ngIf="searchQuery">Try adjusting your search criteria</p>
-    </div>
-
   </nb-card-body>
 </nb-card>
 
-<!-- Optional: Modal or Lightbox for Enlarged Photo -->
-<nb-dialog *ngIf="enlargedPhotoUrl" (close)="enlargedPhotoUrl = null">
-  <img [src]="enlargedPhotoUrl" style="width:100%; max-width:400px; border-radius:8px;" />
+<!-- 📸 Enlarged Photo Modal -->
+<nb-dialog *ngIf="enlargedPhotoUrl" (close)="enlargedPhotoUrl=null">
+  <img [src]="enlargedPhotoUrl" style="width:100%; max-width:400px; border-radius:8px;">
 </nb-dialog>

@@ -59,7 +59,7 @@ export class PaymentRegisterComponent implements OnInit {
     const currentDate = new Date().toLocaleDateString();
 
     // Load logo as Base64
-    const logoData = await this.getImageAsBase64('assets/images/logo.jpg');
+    const logoData = await this.getImageAsBase64('assets/images/DaleViewLogo.jpg');
 
     // Header with Logo
     const drawHeader = () => {
