@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { DashboardService } from './dashboard.service';
 import { forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
+import { from } from 'rxjs';
+import { mergeMap, toArray } from 'rxjs/operators';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './datshboard.component.html',
@@ -62,22 +64,29 @@ paymentColumns = [
 
     this.dashboardService.getRooms().subscribe(rooms => {
       this.rooms = rooms;
-
+  
       // Total active bookings
-      this.totalActiveBookings = this.rooms.reduce((total, room) => total + (room.occupiedCount), 0);
-
-      // Total vacated / temporary occupants
-      const occupantObservables = rooms.map(room => this.dashboardService.getRoomOccupants(room.roomId));
-
-      forkJoin(occupantObservables).subscribe(allOccupants => {
-        this.totalVacated = 0;
-        allOccupants.forEach(roomOccupants => {
-          this.totalVacated += roomOccupants.filter(s => s.isTemporary).length;
+      this.totalActiveBookings = this.rooms.reduce(
+        (total, room) => total + room.occupiedCount, 
+        0
+      );
+  
+      // Instead of calling all 50 APIs at once, limit to 5 concurrent calls
+      from(rooms)
+        .pipe(
+          mergeMap(
+            room => this.dashboardService.getRoomOccupants(room.roomId),
+            5 // 🔹 concurrency limit (you can adjust to 3–10)
+          ),
+          toArray()
+        )
+        .subscribe(allOccupants => {
+          this.totalVacated = allOccupants.reduce((total, roomOccupants) => {
+            return total + roomOccupants.filter(s => s.isTemporary).length;
+          }, 0);
         });
-      });
     });
   }
-
 
   currentMonthAddmission()
   {     const now = new Date();
