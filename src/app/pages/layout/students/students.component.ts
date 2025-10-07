@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,ViewChild, TemplateRef } from '@angular/core';
 import {formatDate} from '@angular/common';
 import { Router } from '@angular/router';
 import jsPDF from 'jspdf';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { StudentService, Student, LedgerEntry } from './students.service';
+import { NbDialogService } from '@nebular/theme';
+
 import autoTable from 'jspdf-autotable';
 @Component({
   selector: 'app-student-list',
@@ -15,7 +17,7 @@ export class StudentsComponent implements OnInit {
   students: Student[] = [];
   filteredStudents: Student[] = [];
   searchQuery = '';
-
+  @ViewChild('photoModal') photoModal!: TemplateRef<any>; // <
   studentPhotos: { [studentId: number]: SafeUrl } = {}; // Blob URLs
   enlargedPhotoUrl?: SafeUrl;
 
@@ -29,6 +31,7 @@ export class StudentsComponent implements OnInit {
     private studentService: StudentService,
     public router: Router,
     private sanitizer: DomSanitizer,
+    private dialogService: NbDialogService,
   ) {}
 
   ngOnInit(): void {
@@ -84,22 +87,29 @@ export class StudentsComponent implements OnInit {
   // 📸 Lazy-load photo and enlarge
   enlargePhoto(student: Student) {
     if (!student.studentId) return;
-
+  
+    const openDialog = () => {
+      this.dialogService.open(this.photoModal, {
+        context: this.studentPhotos[student.studentId], // pass URL
+      });
+    };
+  
     if (this.studentPhotos[student.studentId]) {
-      this.enlargedPhotoUrl = this.studentPhotos[student.studentId];
+      openDialog();
       return;
     }
-
+  
     this.studentService.getPhoto(student.studentId).subscribe({
       next: (blob) => {
         const objectUrl = URL.createObjectURL(blob);
         const safeUrl = this.sanitizer.bypassSecurityTrustUrl(objectUrl);
         this.studentPhotos[student.studentId!] = safeUrl;
-        this.enlargedPhotoUrl = safeUrl;
+        openDialog();
       },
       error: (err) => console.error(`Photo load failed for ${student.fullName}`, err)
     });
   }
+  
 
   // 📜 Ledger
   loadLedger(student: Student) {
@@ -237,5 +247,42 @@ export class StudentsComponent implements OnInit {
       reader.readAsDataURL(blob);
     });
   }
+  triggerFileInput(student: Student) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = (event: any) => this.onPhotoSelected(event, student);
+    fileInput.click();
+  }
+  
+  onPhotoSelected(event: any, student: Student) {
+    const file: File = event.target.files[0];
+    if (!file || !student.studentId) return;
+  
+    if (file.size > 2 * 1024 * 1024) {
+      alert('File size should be less than 2MB');
+      return;
+    }
+  
+    this.studentService.uploadPhoto(student.studentId, file).subscribe({
+      next: () => {
+        alert('Photo uploaded successfully');
+        // Reload the photo immediately after upload
+        this.studentService.getPhoto(student.studentId!).subscribe({
+          next: (blob) => {
+            const objectUrl = URL.createObjectURL(blob);
+            const safeUrl = this.sanitizer.bypassSecurityTrustUrl(objectUrl);
+            this.studentPhotos[student.studentId!] = safeUrl;
+          },
+          error: (err) => console.error('Photo reload failed', err)
+        });
+      },
+      error: (err) => {
+        console.error('Upload failed', err);
+        alert('Photo upload failed.');
+      }
+    });
+  }
+  
   
 }

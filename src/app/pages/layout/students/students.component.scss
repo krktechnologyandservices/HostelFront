@@ -4,7 +4,10 @@
   justify-content: space-between;
   align-items: center;
 }
-.add-button { margin-left: auto; }
+
+.add-button {
+  margin-left: auto;
+}
 
 /* ---------------- Search ---------------- */
 .search-section {
@@ -12,12 +15,26 @@
   gap: 8px;
   margin-bottom: 16px;
 }
-.search-buttons button { margin-left: 4px; }
+
+.search-buttons button {
+  margin-left: 4px;
+}
 
 /* ---------------- Ledger Wrapper ---------------- */
-.ledger-wrapper { display: flex; gap: 20px; }
-.students-col { flex: 1; }
-.ledger-col { flex: 1; border-left: 1px solid #ccc; padding-left: 10px; }
+.ledger-wrapper {
+  display: flex;
+  gap: 20px;
+}
+
+.students-col {
+  flex: 1;
+}
+
+.ledger-col {
+  flex: 1;
+  border-left: 1px solid #ccc;
+  padding-left: 10px;
+}
 
 /* ---------------- Student Card ---------------- */
 .student-card {
@@ -28,28 +45,52 @@
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.student-card:hover { background-color: #f8f9fa; }
+
+.student-card:hover {
+  background-color: #f8f9fa;
+}
 
 .card-grid {
   display: flex;
   gap: 20px;
   align-items: stretch;
 }
-.student-info-col { flex: 2; display: flex; flex-direction: column; gap: 6px; }
-.student-photo-col { flex: 1; display: flex; justify-content: center; align-items: center; }
 
+.student-info-col {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.student-photo-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* ---------------- Photo Frame ---------------- */
 .photo-frame {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #ccc;
+  background-color: #f0f0f0;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  border: 1px solid #ccc;
 }
-.student-photo { width: 100%; height: 100%; object-fit: cover; }
+
+.student-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .photo-placeholder {
   width: 100%;
   height: 100%;
@@ -60,8 +101,40 @@
   color: #666;
 }
 
-.info-item { display: flex; gap: 6px; }
-.card-actions { display: flex; gap: 8px; margin-top: 8px; }
+/* ---------------- Photo Actions ---------------- */
+.photo-actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.photo-actions button[nbButton] {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* Upload & Enlarge Buttons */
+.upload-button {
+  color: #007bff;
+}
+
+.enlarge-button {
+  color: #28a745;
+}
+
+/* ---------------- Info ---------------- */
+.info-item {
+  display: flex;
+  gap: 6px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
 
 /* ---------------- Ledger Table ---------------- */
 .ledger-table {
@@ -91,8 +164,13 @@
 }
 
 /* Alternating Row Colors */
-.ledger-row:nth-child(even):not(.ledger-header) { background-color: #f9f9f9; }
-.ledger-row:nth-child(odd):not(.ledger-header) { background-color: #ffffff; }
+.ledger-row:nth-child(even):not(.ledger-header) {
+  background-color: #f9f9f9;
+}
+
+.ledger-row:nth-child(odd):not(.ledger-header) {
+  background-color: #ffffff;
+}
 
 /* Right-align numbers */
 .ledger-row div:nth-child(4),
@@ -103,10 +181,21 @@
 }
 
 /* Type-based color coding */
-.type-payment { background-color: #e8f4ff; }
-.type-adjustment { background-color: #fff8e1; }
-.type-charge { background-color: #fff3e0; }
-.type-advance { background-color: #e8ffe8; }
+.type-payment {
+  background-color: #e8f4ff;
+}
+
+.type-adjustment {
+  background-color: #fff8e1;
+}
+
+.type-charge {
+  background-color: #fff3e0;
+}
+
+.type-advance {
+  background-color: #e8ffe8;
+}
 
 /* Closing Balance Highlight */
 .ledger-row.closing-balance {
@@ -115,7 +204,7 @@
   color: #1b5e20;
 }
 
-/* Date Filter Section */
+/* ---------------- Date Filter ---------------- */
 .date-filter {
   display: flex;
   gap: 8px;
@@ -125,13 +214,60 @@
 
 /* ---------------- Responsive ---------------- */
 @media (max-width: 768px) {
-  .ledger-wrapper { flex-direction: column; }
-  .ledger-col { border-left: none; padding-left: 0; margin-top: 16px; }
-  .card-grid { flex-direction: column; align-items: center; }
-  .student-info-col { text-align: center; }
-  .photo-frame { width: 100px; height: 100px; }
+  .ledger-wrapper {
+    flex-direction: column;
+  }
+
+  .ledger-col {
+    border-left: none;
+    padding-left: 0;
+    margin-top: 16px;
+  }
+
+  .card-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .student-info-col {
+    text-align: center;
+  }
+
+  .photo-frame {
+    width: 100px;
+    height: 100px;
+  }
 
   /* Make ledger table scrollable horizontally on mobile */
-  .ledger-table { overflow-x: auto; }
-  .ledger-row { grid-template-columns: 80px 100px minmax(120px, 1fr) 70px 70px 70px; }
+  .ledger-table {
+    overflow-x: auto;
+  }
+
+  .ledger-row {
+    grid-template-columns: 80px 100px minmax(120px, 1fr) 70px 70px 70px;
+  }
+}
+.student-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  color: #777;
+}
+
+.upload-icon {
+  margin-top: 4px;
+  display: flex;
+  gap: 4px;
+}
+
+.upload-icon button[nbButton] {
+  padding: 2px 4px;
+  font-size: 12px;
 }

@@ -5,12 +5,21 @@
   </nb-card-header>
 
   <nb-card-body>
+    <!-- Filter Section -->
+    <div class="filter-bar">
+      <input nbInput placeholder="Search by Name or Receipt No" [(ngModel)]="searchText" (input)="applyFilter()">
+      <input nbInput type="date" [(ngModel)]="fromDate" (change)="applyFilter()">
+      <input nbInput type="date" [(ngModel)]="toDate" (change)="applyFilter()">
+      <button nbButton status="success" size="small" (click)="submitFilter()">Search</button>
+      <button nbButton status="basic" size="small" (click)="resetFilter()">Reset</button>
+    </div>
+
     <nb-spinner *ngIf="loading"></nb-spinner>
 
-    <div *ngIf="!loading && payments.length" class="payment-grid">
-      <nb-card *ngFor="let p of payments" class="payment-card">
+    <div *ngIf="!loading && filteredPayments.length" class="payment-grid">
+      <nb-card *ngFor="let p of filteredPayments" class="payment-card">
         <nb-card-header>
-          Payment No. {{ p.id }} - Student Name:{{ p.studentName }} -Date:{{ p.paymentDate | date:'shortDate' }}
+          Payment No. {{ p.id }} - Student Name: {{ p.studentName }} - Date: {{ p.paymentDate | date:'shortDate' }}
         </nb-card-header>
         <nb-card-body>
           <div>Mode: {{ p.paymentMode }}</div>
@@ -19,15 +28,15 @@
           <div>Status: {{ p.status }}</div>
         </nb-card-body>
         <nb-card-footer>
-          <button nbButton status="info" size="tiny" (click)="editPayment(p)"  *ngIf="1==2">Edit</button>
-          <button nbButton status="danger" size="tiny" (click)="deletePayment(p)"  *ngIf="p.status!='Cancelled'">Cancel</button>
-          <button nbButton status="primary" size="tiny" (click)="printReceipt(p)" *ngIf="p.status!='Cancelled'">Print</button>
-          <button nbButton status="primary" size="tiny" (click)="UpdateVerficaition(p.id)" *ngIf="p.status=='Verification' ">Verified</button>
+          <button nbButton status="info" size="tiny" (click)="editPayment(p)" *ngIf="1==2">Edit</button>
+          <button nbButton status="danger" size="tiny" (click)="deletePayment(p)" *ngIf="p.status!='Cancelled'">Cancel</button>
+          <button nbButton status="primary" size="tiny" (click)="printReceipt(p)" *ngIf="p.status=='Paid'">Print</button>
+          <button nbButton status="primary" size="tiny" (click)="UpdateVerficaition(p.id)" *ngIf="p.status=='Verification'">Verfication Done</button>
         </nb-card-footer>
       </nb-card>
     </div>
 
-    <div *ngIf="!loading && !payments.length">
+    <div *ngIf="!loading && !filteredPayments.length">
       No payments found.
     </div>
   </nb-card-body>

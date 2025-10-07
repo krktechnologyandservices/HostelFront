@@ -37,6 +37,7 @@ import { StudentsFormComponent } from './students/studentsform/studentsform.comp
 import { RoomComponent } from './rooms/rooms.component';
 import { RoomFormComponent } from './rooms/rooms-form/rooms-form.component';
 import { DashboardComponent } from './datshboard/datshboard.component';
+import { NbTooltipModule } from '@nebular/theme';
 
 @NgModule({
   imports: [
@@ -58,7 +59,8 @@ import { DashboardComponent } from './datshboard/datshboard.component';
     NbIconModule,
     NbFormFieldModule,
     NbRadioModule,
-    NbLayoutModule
+    NbLayoutModule,
+    NbTooltipModule
     
   ],
   declarations: [

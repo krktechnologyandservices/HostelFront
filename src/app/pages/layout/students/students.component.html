@@ -37,17 +37,33 @@
             </div>
 
             <div class="student-photo-col">
-              <div class="photo-frame"
-                   (click)="enlargePhoto(student); $event.stopPropagation()"
-                   [title]="'Click to enlarge'">
-                <img *ngIf="studentPhotos[student.studentId]; else noPhoto"
-                     [src]="studentPhotos[student.studentId]"
-                     class="student-photo">
-                <ng-template #noPhoto>
-                  <div class="photo-placeholder">Click to view</div>
-                </ng-template>
+              <!-- Photo frame -->
+              <div class="photo-frame" (click)="enlargePhoto(student)">
+                <img
+                  *ngIf="studentPhotos[student.studentId]"
+                  [src]="studentPhotos[student.studentId]"
+                  class="student-photo"
+                  alt="Student Photo"
+                />
+                <div *ngIf="!studentPhotos[student.studentId]" class="photo-placeholder">
+                  Click to view
+                </div>
+              </div>
+            
+              <!-- Small icon buttons below -->
+              <div class="upload-icon">
+                <button nbButton ghost size="tiny" status="primary" title="Upload" (click)="triggerFileInput(student)">
+                  <nb-icon icon="upload-outline"></nb-icon>
+                </button>
+                <button nbButton ghost size="tiny" status="info" title="Enlarge" (click)="enlargePhoto(student)">
+                  <nb-icon icon="expand-outline"></nb-icon>
+                </button>
               </div>
             </div>
+            
+            
+            
+            
           </div>
         </div>
       </div>
@@ -100,7 +116,6 @@
   </nb-card-body>
 </nb-card>
 
-<!-- 📸 Enlarged Photo Modal -->
-<nb-dialog *ngIf="enlargedPhotoUrl" (close)="enlargedPhotoUrl=null">
-  <img [src]="enlargedPhotoUrl" style="width:100%; max-width:400px; border-radius:8px;">
-</nb-dialog>
+<ng-template #photoModal let-data>
+  <img [src]="data" style="width:100%; max-width:400px; border-radius:8px;">
+</ng-template>

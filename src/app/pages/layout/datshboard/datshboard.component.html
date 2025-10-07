@@ -1,130 +1,257 @@
-<nb-layout>
-    <nb-layout-column>
-  
-      <!-- KPI Cards -->
-      <div class="row mb-3">
-        <nb-card status="primary">
-          <nb-card-header>Total Students</nb-card-header>
-          <nb-card-body>{{studentStats?.totalStudents}}</nb-card-body>
-        </nb-card>
-  
-        <nb-card status="info">
-          <nb-card-header>Active Bookings</nb-card-header>
-          <nb-card-body>{{studentStats?.activeBookings}}</nb-card-body>
-        </nb-card>
-  
-        <nb-card status="success">
-          <nb-card-header>Vacated Students</nb-card-header>
-          <nb-card-body>{{studentStats?.vacatedStudents}}</nb-card-body>
-        </nb-card>
-  
-        <nb-card status="danger">
-          <nb-card-header>Total Late Fees</nb-card-header>
-          <nb-card-body>{{lateFees?.totalLateFees | currency}}</nb-card-body>
-        </nb-card>
-      </div>
-  
-      <!-- Pending Dues Table -->
-      <nb-card class="mb-3">
-        <nb-card-header>Pending Dues</nb-card-header>
-        <nb-card-body>
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Room</th>
-                  <th>Amount</th>
-                  <th>Due Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let item of pendingDues">
-                  <td>{{item.studentName}}</td>
-                  <td>{{item.roomNumber}}</td>
-                  <td>{{item.pendingAmount | currency}}</td>
-                  <td>{{item.dueDate | date}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </nb-card-body>
-      </nb-card>
+<nb-card>
+  <nb-card-header>
+    <nb-accordion>
+      <nb-accordion-item>
+        <nb-accordion-item-header>
+          Room Dashboard
+        </nb-accordion-item-header>
+        <nb-accordion-item-body>
+          <div class="dashboard-body">
 
-  
-      <!-- Upcoming Bills Table -->
-      <nb-card class="mb-3">
-        <nb-card-header class="d-flex justify-content-between align-items-center">
-          <span>Upcoming Bills (Next 7 Days)</span>
-      
-          <!-- Attractive Button -->
-          <button nbButton status="success" size="small" (click)="onGenerateBills()" [disabled]="isGenerating" nbTooltip="Generate Bills Now">
-            <nb-icon *ngIf="!isGenerating" icon="flash-outline"></nb-icon>
-            <span *ngIf="!isGenerating">Generate</span>
-      
-            <!-- Show spinner when busy -->
-            <nb-spinner *ngIf="isGenerating" size="tiny"></nb-spinner>
-          </button>
-        </nb-card-header>
-      
-        <nb-card-body>
-          <div *ngIf="isGenerating" class="text-center my-3">
-            <nb-spinner size="large"></nb-spinner>
-            <p class="mt-2">Generating bills, please wait...</p>
+            <!-- Summary Icons -->
+            <div class="summary-icons">
+              <div class="summary-item">
+                <nb-icon icon="home-outline" class="active-booking"></nb-icon>
+                <span>{{ totalActiveBookings }}</span>
+                <p>Active Bookings</p>
+              </div>
+              <div class="summary-item">
+                <nb-icon icon="person-outline" class="vacated"></nb-icon>
+                <span>{{ totalVacated }}</span>
+                <p>Vacated / Temporary</p>
+              </div>
+            </div>
+            
+
+            <!-- Rooms -->
+            <div class="rooms-container">
+              <button *ngFor="let room of rooms"
+                      class="room-icon-btn"
+                      [ngStyle]="{'background-color': getRoomColor(room)}"
+                      nbTooltip="Room {{room.roomNo}} - Occupied: {{room.occupiedCount}} / {{room.capacity}}"
+                      nbTooltipPlacement="top"
+                      (click)="selectRoom(room)">
+                <nb-icon icon="home-outline"></nb-icon>
+                <span class="room-number">{{room.roomNo}}</span>
+              </button>
+            </div>
+
+            <!-- Occupants -->
+            <div *ngIf="selectedRoom" class="occupants-container">
+              <h5>Occupants in Room {{selectedRoom.roomNo}}</h5>
+              <div class="students-icons">
+                <button *ngFor="let student of occupants"
+                        class="student-icon-btn"
+                        [ngClass]="{
+                          male: student.gender==='Male',
+                          female: student.gender==='Female',
+                          temporary: student.isTemporary,
+                          pending: student.paymentStatus==='Pending'
+                        }"
+                        nbTooltip="Name: {{student.fullName}}&#10;Phone: {{student.phone}}&#10;Email: {{student.email}}"
+                        nbTooltipPlacement="top">
+                  <nb-icon icon="person-outline"></nb-icon>
+                </button>
+              </div>
+            </div>
+
           </div>
-      
-          <div class="table-responsive" *ngIf="!isGenerating">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Room</th>
-                  <th>Due Date</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let bill of upcomingBills">
-                  <td>{{bill.studentName}}</td>
-                  <td>{{bill.roomNumber}}</td>
-                  <td>{{bill.dueDate | date}}</td>
-                  <td>{{bill.totalAmount | currency}}</td>
-                </tr>
-              </tbody>
-            </table>
+        </nb-accordion-item-body>
+      </nb-accordion-item>
+
+
+
+      <nb-accordion-item>
+        <nb-accordion-item-header>
+          Student Dashboard
+        </nb-accordion-item-header>
+        <nb-accordion-item-body>
+          <div class="dashboard-body">
+
+            <!-- Summary Icons -->
+            <div class="summary-icons">
+              <div class="summary-item">
+                <nb-icon icon="person-add-outline" class="admission" (click)="currentMonthAddmission()"></nb-icon>
+                <span>{{ currentMonthAdmissions }}</span>
+                <p>Admissions (Current Month)</p>
+              </div>
+              <div class="summary-item">
+                <nb-icon icon="person-outline" class="male"  (click)="GetStudentbygender('Male')" ></nb-icon>
+                <span>{{ maleCount }}</span>
+                <p>Male Students</p>
+              </div>
+              <div class="summary-item">
+                <nb-icon icon="person-outline" class="female"  (click)="GetStudentbygender('Female')"></nb-icon>
+                <span>{{ femaleCount }}</span>
+                <p>Female Students</p>
+              </div>
+            </div>
+
+            <!-- Course Wise Count -->
+            <div class="course-count">
+              <nb-card *ngFor="let course of courses" class="course-card">
+                <nb-card-header>{{ course }}</nb-card-header>
+                <nb-card-body>
+                  <span class="count"  >{{ courseWiseCount[course] }}</span>
+                  <nb-icon icon="book-outline" (click)="GetStudentBycourse(course)"></nb-icon>
+                </nb-card-body>
+              </nb-card>
+            </div>
+
+            <!-- Inactive Students Table -->
+            <div class="inactive-students">
+              <h5> Students</h5>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Course</th>
+                    <th>phone</th>
+                    <th>Room</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let s of inactiveStudents">
+                    <td>{{ s.fullName }}</td>
+                    <td>{{ s.gender }}</td>
+                    <td>{{ s.course }}</td>
+                    <td>{{ s.phone || 'N/A' }}</td>
+                    <td>{{ s.roomNo || 'N/A' }}</td>
+                    
+                    <td>
+                      <button nbButton status="info" size="tiny" (click)="viewStudent(s)">
+                        <nb-icon icon="eye-outline"></nb-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <button nbButton status="success" (click)="openExportModal()">
+                <nb-icon icon="download-outline"></nb-icon> Export
+              </button>
+            </div>
+
+            <!-- Export Modal -->
+            <nb-card *ngIf="showExportModal" class="export-modal">
+              <nb-card-header>Export Students</nb-card-header>
+              <nb-card-body>
+                <form>
+                  <div class="form-group">
+                    <label>Room</label>
+                    <input type="text" nbInput placeholder="Room number">
+                  </div>
+                  <div class="form-group">
+                    <label>Gender</label>
+                    <select nbSelect>
+                      <option value="">All</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Admission From</label>
+                    <input type="date" nbInput>
+                  </div>
+                  <div class="form-group">
+                    <label>Admission To</label>
+                    <input type="date" nbInput>
+                  </div>
+                  <button nbButton status="primary" (click)="exportStudents($event)">Export</button>
+                  <button nbButton status="danger" (click)="closeExportModal()">Cancel</button>
+                </form>
+              </nb-card-body>
+            </nb-card>
+
           </div>
-        </nb-card-body>
-      </nb-card>
+        </nb-accordion-item-body>
+      </nb-accordion-item>
+
       
-      
-  
-      <!-- Room Utilization Table -->
-      <nb-card class="mb-3">
-        <nb-card-header>Room Utilization</nb-card-header>
-        <nb-card-body>
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Room</th>
-                  <th>Capacity</th>
-                  <th>Occupied</th>
-                  <th>Available</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let room of roomUtilization">
-                  <td>{{room.roomNumber}}</td>
-                  <td>{{room.capacity}}</td>
-                  <td>{{room.occupiedCount}}</td>
-                  <td>{{room.capacity - room.occupiedCount}}</td>
-                </tr>
-              </tbody>
-            </table>
+      <nb-accordion-item>
+        <nb-accordion-item-header>
+         Bills&Payment
+        </nb-accordion-item-header>
+        <nb-accordion-item-body>
+          <div class="dashboard-body">
+
+
+<!-- Collapsible Payment Dashboard -->
+<div class="collapsible-section">
+  <div class="section-header" (click)="toggleSection('payments')">
+    <h3>💳 Payment Dashboard</h3>
+    <nb-icon [icon]="collapsedSections.payments ? 'chevron-down' : 'chevron-up'"></nb-icon>
+  </div>
+
+  <div class="section-body" *ngIf="!collapsedSections.payments">
+    <!-- Summary Icons -->
+    <div class="summary-icons">
+      <div class="summary-item" (click)="loadPayments('today')">
+        <nb-icon icon="calendar-outline" class="icon-today"></nb-icon>
+        <span>{{ todayPaymentsCount }}</span>
+        <p>Today's Payments</p>
+      </div>
+
+      <div class="summary-item" (click)="loadPayments('month')">
+        <nb-icon icon="calendar-number-outline" class="icon-month"></nb-icon>
+        <span>{{ monthPaymentsCount }}</span>
+        <p>Current Month Payments</p>
+      </div>
+
+      <div class="summary-item" (click)="loadPayments('pending')">
+        <nb-icon icon="clock-outline" class="icon-pending"></nb-icon>
+        <span>{{ pendingPaymentsCount }}</span>
+        <p>Pending Verifications</p>
+      </div>
+
+      <div class="summary-item" (click)="loadPayments('due')">
+        <nb-icon icon="alert-circle-outline" class="icon-due"></nb-icon>
+        <span>{{ totalDueAmount | currency:'INR' }}</span>
+        <p>Total Bill Due</p>
+      </div>
+    </div>
+
+    <!-- Payment Table with Filters -->
+    <div class="payment-grid-container" *ngIf="payments.length">
+      <div class="filter-row">
+        <input *ngFor="let col of paymentColumns"
+               type="text"
+               placeholder="Filter {{col.header}}"
+               [(ngModel)]="paymentFilters[col.field]"
+               (ngModelChange)="applyPaymentFilters()" />
+      </div>
+
+      <table class="payment-table">
+        <thead>
+          <tr>
+            <th *ngFor="let col of paymentColumns">{{ col.header }}</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let payment of filteredPayments">
+            <td *ngFor="let col of paymentColumns">{{ payment[col.field] }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" (click)="viewPayment(payment)">
+                <nb-icon icon="eye-outline"></nb-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
           </div>
-        </nb-card-body>
-      </nb-card>
+          </nb-accordion-item-body>
+        </nb-accordion-item>
   
-    </nb-layout-column>
-  </nb-layout>
-  
+
+
+    </nb-accordion>
+  </nb-card-header>
+</nb-card>

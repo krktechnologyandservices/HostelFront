@@ -62,10 +62,20 @@ export class StudentService {
   update(id: number, student: Student): Observable<any> { return this.http.put(`${this.api}/${id}`, student); }
   delete(id: number): Observable<any> { return this.http.delete(`${this.api}/${id}`); }
 
-  uploadPhoto(id: number, formData: FormData): Observable<{ photoUrl: string }> {
-    return this.http.post<{ photoUrl: string }>(`${this.api}/${id}/upload-photo`, formData);
-  }
+  // uploadPhoto(id: number, formData: FormData): Observable<{ photoUrl: string }> {
+  //   return this.http.post<{ photoUrl: string }>(`${this.api}/${id}/upload-photo`, formData);
+  // }
   
+
+  uploadPhoto(studentId: number, file: File) {
+    const formData = new FormData();
+    formData.append('photo', file);
+  
+    return this.http.post(`${this.api}/${studentId}/upload-photo`, formData);
+  }
+
+  
+
   deletePhoto(id: number): Observable<any> {
     return this.http.delete(`${this.api}/${id}/delete-photo`);
   }

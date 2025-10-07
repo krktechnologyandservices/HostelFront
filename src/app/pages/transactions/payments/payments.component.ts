@@ -1,3 +1,4 @@
+
 import { Component, OnInit, NgZone } from '@angular/core';
 import { NbToastrService } from '@nebular/theme';
 import { PaymentService, PaymentView } from './payments.service';
@@ -15,7 +16,13 @@ import * as CryptoJS from 'crypto-js';
 })
 export class PaymentListComponent implements OnInit {
   payments: PaymentView[] = [];
+  filteredPayments: PaymentView[] = [];
   loading = true;
+
+  // Filter fields
+  searchText: string = '';
+  fromDate: string = '';
+  toDate: string = '';
 
   constructor(
     private paymentService: PaymentService,
@@ -25,30 +32,83 @@ export class PaymentListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    this.fromDate = todayStr;
+    this.toDate = todayStr;
+
     this.load();
   }
 
   load() {
     this.loading = true;
     this.paymentService.getAll().subscribe({
-      next: res => { this.payments = res; this.loading = false; },
-      error: () => { this.loading = false; this.toastr.danger('Failed to load payments'); }
+      next: res => { 
+        this.payments = res; 
+        this.applyFilter();
+        this.loading = false; 
+      },
+      error: () => { 
+        this.loading = false; 
+        this.toastr.danger('Failed to load payments'); 
+      }
     });
   }
 
+  // --- FILTER METHODS ---
+  applyFilter() {
+    this.filteredPayments = this.payments.filter(p => {
+      const matchesText = !this.searchText ||
+        p.studentName.toLowerCase().includes(this.searchText.toLowerCase()) ||
+        p.id.toString().includes(this.searchText);
+  
+      // --- Only compare date parts ---
+      const paymentDate = new Date(p.paymentDate);
+      const from = this.fromDate ? new Date(this.fromDate + 'T00:00:00') : null;
+      const to = this.toDate ? new Date(this.toDate + 'T23:59:59') : null;
+  
+      const matchesDate =
+        (!from || paymentDate >= from) &&
+        (!to || paymentDate <= to);
+  
+      return matchesText && matchesDate;
+    });
+  }
+  
+
+  submitFilter() {
+    this.applyFilter();
+  }
+
+  resetFilter() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    this.searchText = '';
+    this.fromDate = todayStr;
+    this.toDate = todayStr;
+    this.applyFilter();
+  }
+
   addPayment() {
-    this.router.navigate(['pages/transactions/payments/new']); // navigate to payment form page
+    this.router.navigate(['pages/transactions/payments/new']);
   }
 
   editPayment(payment: PaymentView) {
-    this.router.navigate([`pages/transactions/payments/${payment.id}/edit`]); // navigate to payment form page with ID
+    this.router.navigate([`pages/transactions/payments/${payment.id}/edit`]);
   }
 
-  UpdateVerficaition(paymentId: number)
-  {
-    if (!confirm('is the Payment Verfied?')) return;
+  UpdateVerficaition(paymentId: number) {
+    if (!confirm('Is the Payment Verified?')) return;
     this.paymentService.UpdateVerification(paymentId).subscribe({
-      next: () => { this.toastr.success('Update was successfull'); this.load(); },
+      next: () => { this.toastr.success('Update was successful'); this.load(); },
       error: () => this.toastr.danger('Update failed')
     });
   }
@@ -60,6 +120,7 @@ export class PaymentListComponent implements OnInit {
       error: () => this.toastr.danger('Cancellation failed')
     });
   }
+
   printReceipt(payment: any) {
     this.paymentService.getReceipt(payment.id).subscribe({
       next: (fullPayment) => {
@@ -68,7 +129,13 @@ export class PaymentListComponent implements OnInit {
       error: () => this.toastr.danger('Failed to fetch receipt details'),
     });
   }
-  
+
+  // --- Keep your existing generateReceiptPdf(), QR, and number-to-words methods as is ---
+  // ... (copy all existing PDF methods from your current component)
+
+
+
+
 
 
   // --- Main PDF generation method ---
