@@ -76,7 +76,7 @@ paymentColumns = [
         .pipe(
           mergeMap(
             room => this.dashboardService.getRoomOccupants(room.roomId),
-            1// 🔹 concurrency limit (you can adjust to 3–10)
+            5// 🔹 concurrency limit (you can adjust to 3–10)
           ),
           toArray()
         )
