@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Bill, BillingService } from './billsservice.service';
 import { NbDialogService } from '@nebular/theme';
-import { NbToastrService, NbGlobalPhysicalPosition, NbGlobalPosition } from '@nebular/theme'
+import { NbToastrService } from '@nebular/theme';
 import { OfflinePaymentModalComponent } from './offlinepaymentmodal/offlinepaymentmodal.component';
+
 @Component({
   selector: 'app-bills',
   templateUrl: './bills.component.html',
@@ -11,12 +12,15 @@ import { OfflinePaymentModalComponent } from './offlinepaymentmodal/offlinepayme
 export class BillsComponent implements OnInit {
 
   bills: Bill[] = [];
+  filteredBills: Bill[] = [];
   loading: boolean = false;
+  searchTerm: string = '';
 
-  constructor(private billingService: BillingService, 
+  constructor(
+    private billingService: BillingService,
     private dialogService: NbDialogService,
     private toastrService: NbToastrService
-    ) {}
+  ) {}
 
   ngOnInit(): void {
     this.loadBills();
@@ -31,10 +35,25 @@ export class BillsComponent implements OnInit {
           ...b,
           status: b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase()
         }));
+        this.applyFilter();
         this.loading = false;
       },
       error: () => this.loading = false
     });
+  }
+
+  applyFilter() {
+    if (!this.searchTerm) {
+      this.filteredBills = [...this.bills];
+    } else {
+      const term = this.searchTerm.toLowerCase();
+      this.filteredBills = this.bills.filter(b =>
+        (b.studentName?.toLowerCase().includes(term)) ||
+        (b.phone?.toLowerCase().includes(term)) ||
+        (b.roomType?.toLowerCase().includes(term)) ||
+        (b.status?.toLowerCase().includes(term))
+      );
+    }
   }
 
   isPending(bill: Bill) {
@@ -48,24 +67,21 @@ export class BillsComponent implements OnInit {
     });
   }
 
-
   uploadOffline(bill: any) {
     const dialogRef = this.dialogService.open(OfflinePaymentModalComponent, {
       closeOnBackdropClick: false,
       closeOnEsc: true,
     });
   
-    // Pass the billId after dialog creation
     dialogRef.componentRef.instance.billId = bill.id;
     dialogRef.componentRef.instance.amount = bill.amount;
 
     dialogRef.onClose.subscribe(result => {
       if (result) {
-        this.loadBills(); // refresh bills after successful offline payment
+        this.loadBills();
       }
     });
   }
-
 
   approvePayment(bill: Bill) {
     this.billingService.approvePayment(bill.id).subscribe({
@@ -92,15 +108,16 @@ export class BillsComponent implements OnInit {
       default: return 'basic';
     }
   }
+
   deleteBill(bill: any) {
     if (confirm(`Are you sure you want to cancel Bill #${bill.id}?`)) {
       this.billingService.softDeleteBill(bill.id).subscribe({
         next: () => {
-          bill.status = 'Cancelled'; // update UI immediately
+          bill.status = 'Cancelled';
         },
         error: (err) => {
           console.error('Cancellation failed', err);
-          alert('cancellation failed, please try again.');
+          alert('Cancellation failed, please try again.');
         }
       });
     }

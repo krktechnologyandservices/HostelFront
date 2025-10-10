@@ -78,7 +78,7 @@
               </thead>
               <tbody formArrayName="billAdjustments">
                 <tr *ngFor="let b of billAdjArray.controls; let i = index" [formGroupName]="i">
-                  <td>{{ b.value.roomNumber }}</td>
+                  <td>{{ b.value.roomNo }}</td>
                   <td>{{ b.value.period }}</td>
                   <td>{{ b.value.billAmount | currency }}</td>
                   <td>{{ b.value.balance | currency }}</td>

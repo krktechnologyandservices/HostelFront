@@ -6,7 +6,7 @@ import { environment } from '../../../../environments/environment';
 export interface PendingBill {
   billId: number;
   period?: string;
-  roomNumber?: string;
+  roomNo?: string;
   billAmount: number;
   paidAmount: number;
   balance: number;

@@ -5,13 +5,21 @@
 
 <!-- Bills Section -->
 <nb-card>
-  <nb-card-header>Bills</nb-card-header>
+  <nb-card-header>
+    Bills
+    <input nbInput placeholder="Search by Student, Phone, Room, Status"
+           [(ngModel)]="searchTerm"
+           (ngModelChange)="applyFilter()"
+           class="search-input">
+  </nb-card-header>
+
   <nb-card-body *ngIf="!loading; else loadingTpl">
 
-    <!-- Responsive Table / Card Grid -->
     <div class="bills-container">
-      <div class="bill-item" *ngFor="let bill of bills">
+      <div class="bill-item" *ngFor="let bill of filteredBills">
         <div class="bill-field"><strong>ID:</strong> {{ bill.id }}</div>
+        <div class="bill-field"><strong>Student Name:</strong> {{ bill.studentName }}</div>
+        <div class="bill-field"><strong>Phone:</strong> {{ bill.phone }}</div>
         <div class="bill-field"><strong>Room:</strong> {{ bill.roomType }}</div>
         <div class="bill-field"><strong>Period:</strong> {{ bill.period }}</div>
         <div class="bill-field"><strong>Amount:</strong> {{ bill.amount | currency:'INR' }}</div>
@@ -46,7 +54,6 @@
   </nb-card-body>
 </nb-card>
 
-<!-- Loading -->
 <ng-template #loadingTpl>
   <div class="loading-container">
     <nb-spinner size="giant"></nb-spinner>

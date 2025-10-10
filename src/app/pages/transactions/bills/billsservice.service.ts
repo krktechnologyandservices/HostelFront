@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 export interface Bill {
   id: number;
   studentName: string;
+  phone: string;
   roomType: string;
   period: string;
   amount: number;

@@ -137,7 +137,7 @@ export class PaymentFormComponent implements OnInit {
         const adjAmount = existingAdjMap.get(b.billId)?.adjustedAmount || 0;
         this.billAdjArray.push(this.fb.group({
           billId: [b.billId],
-          roomNumber: [b.roomNumber || '-'],
+          roomNo: [b.roomNo || '-'],
           period: [b.period],
           billAmount: [b.billAmount],
           balance: [b.balance],
