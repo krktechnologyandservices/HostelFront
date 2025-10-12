@@ -1,3 +1,4 @@
+// paymentsforms.component.ts
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { PaymentService, PaymentCreateDto, PendingBill, ExpenseHead } from '../payments.service';
@@ -185,7 +186,10 @@ export class PaymentFormComponent implements OnInit {
   }
 
   save() {
-    if (this.form.invalid) { alert('Please complete required fields'); return; }
+    if (this.form.invalid) { 
+      alert('Please complete all required fields'); 
+      return; 
+    }
 
     const dto: PaymentCreateDto = {
       studentId: Number(this.form.value.studentId),

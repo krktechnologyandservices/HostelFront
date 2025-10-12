@@ -1,3 +1,4 @@
+// paymentregister.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PaymentRegisterService } from './paymentregister.service';
@@ -50,7 +51,6 @@ export class PaymentRegisterComponent implements OnInit {
     this.loadPayments();
   }
 
- 
   async exportPDF() {
     const doc = new jsPDF.default('p','pt','a4');
     let yPos = 70;
@@ -219,12 +219,12 @@ export class PaymentRegisterComponent implements OnInit {
     });
   }
 
-  
   getStatusClass(status: string) {
-    return {
+    const statusMap: any = {
       'status-paid': status?.toLowerCase() === 'paid',
       'status-pending': status?.toLowerCase() === 'pending',
       'status-failed': status?.toLowerCase() === 'overdue' || status?.toLowerCase() === 'failed',
     };
+    return statusMap;
   }
 }

@@ -9,7 +9,7 @@ import {
   NbStepperModule,
   NbTabsetModule, NbUserModule,NbCheckboxModule,NbInputModule ,NbSelectModule,
   NbIconModule,
-  NbFormFieldModule,NbRadioModule,NbLayoutModule
+  NbFormFieldModule,NbRadioModule,NbLayoutModule,NbBadgeModule
 
 } from '@nebular/theme';
 
@@ -60,7 +60,8 @@ import { NbTooltipModule } from '@nebular/theme';
     NbFormFieldModule,
     NbRadioModule,
     NbLayoutModule,
-    NbTooltipModule
+    NbTooltipModule,
+    NbBadgeModule
     
   ],
   declarations: [

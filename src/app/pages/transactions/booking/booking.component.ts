@@ -1,3 +1,4 @@
+// bookings.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BookingService, Booking } from '../booking/booking.service';
@@ -6,7 +7,8 @@ import { RoomService, Room } from '../../layout/rooms/rooms.service';
 
 @Component({
   selector: 'app-booking-list',
-  templateUrl: './booking.component.html'
+  templateUrl: './booking.component.html',
+  styleUrls: ['./booking.component.scss']
 })
 export class BookingComponent implements OnInit {
   bookings: Booking[] = [];
@@ -63,6 +65,11 @@ export class BookingComponent implements OnInit {
     }
   }
 
+  clearSearch() {
+    this.searchQuery = '';
+    this.search();
+  }
+
   addBooking() {
     this.router.navigate(['pages/transactions/bookings/add']);
   }
@@ -79,10 +86,6 @@ export class BookingComponent implements OnInit {
     if (confirm(`Delete booking for student ${this.getStudentName(b.studentId)}?`)) {
       this.bookingService.delete(b.id!).subscribe(() => this.loadData());
     }
-  }
-
-  pay(booking: Booking) {
-    this.router.navigate(['pages/transactions/bookings/payment', booking.id]);
   }
 
   // ------------------ VOCATION ------------------
@@ -105,5 +108,4 @@ export class BookingComponent implements OnInit {
       this.selectedBooking = null;
     });
   }
-  
 }

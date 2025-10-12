@@ -1,60 +1,243 @@
-<nb-card>
-  <nb-card-header>
-    Bookings
-    <button nbButton status="success" size="small" style="float:right" (click)="addBooking()">Add Booking</button>
+<!-- bookings.component.html -->
+<nb-card class="booking-management-card">
+  <nb-card-header class="booking-header">
+    <div class="header-content">
+      <h4>Bookings</h4>
+      <button nbButton status="success" size="small" (click)="addBooking()">
+        <nb-icon icon="plus-outline"></nb-icon>
+        Add Booking
+      </button>
+    </div>
   </nb-card-header>
 
-  <nb-card-body>
-    <div style="margin-bottom:10px;">
-      <input nbInput placeholder="Search by student, room, period, status" [(ngModel)]="searchQuery">
-      <button nbButton status="info" size="tiny" (click)="search()">Search</button>
-      <button nbButton status="secondary" size="tiny" (click)="searchQuery=''; search()">Reset</button>
+  <nb-card-body class="booking-body">
+    <!-- Search Section -->
+    <div class="search-section">
+      <div class="search-input-group">
+        <input 
+          nbInput 
+          fullWidth 
+          placeholder="Search by student, room, period, status..." 
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="search()"
+          class="search-input">
+        <button nbButton status="primary" size="small" (click)="search()" class="search-btn">
+          <nb-icon icon="search-outline"></nb-icon>
+          Search
+        </button>
+        <button nbButton status="basic" size="small" (click)="clearSearch()" class="reset-btn">
+          <nb-icon icon="refresh-outline"></nb-icon>
+          Reset
+        </button>
+      </div>
     </div>
 
-    <table class="table table-bordered table-striped">
-      <thead>
-        <tr>
-          <th>Student</th>
-          <th>Room</th>
-          <th>Tariff</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Vocation Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let b of filteredBookings">
-          <td>{{ getStudentName(b.studentId) }}</td>
-          <td>{{ getRoomNumber(b.roomId) }}</td>
-          <td>{{ b.tariffPeriod }}</td>
-          <td>{{ b.startDate | date }}</td>
-          <td>{{ b.endDate | date }}</td>
-          <td>₹{{ b.amount }}</td>
-          <td>{{ b.status }}</td>
-          <td>{{ b.vocationDate ? (b.vocationDate | date:'shortDate') : '-' }}</td>
-          <td>
-            <button nbButton size="tiny" status="info" (click)="editBooking(b)" *ngIf="b.status!='Cancelled'">Edit</button>
-            <button nbButton size="tiny" status="warning" (click)="openVocationModal(b)" *ngIf="b.status!='Cancelled'">Vocate</button>
-            <button nbButton size="tiny" status="danger" (click)="deleteBooking(b)" *ngIf="b.status!='Cancelled'">Cancel</button>
+    <!-- Desktop Table -->
+    <div class="table-container desktop-view">
+      <table class="bookings-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Room</th>
+            <th>Tariff</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Vocation Date</th>
+            <th class="actions-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of filteredBookings">
+            <td>
+              <div class="student-info">
+                <nb-icon icon="person-outline" status="info"></nb-icon>
+                {{ getStudentName(b.studentId) }}
+              </div>
+            </td>
+            <td>
+              <div class="room-info">
+                <nb-icon icon="home-outline" status="primary"></nb-icon>
+                {{ getRoomNumber(b.roomId) }}
+              </div>
+            </td>
+            <td>{{ b.tariffPeriod }}</td>
+            <td>{{ b.startDate | date:'mediumDate' }}</td>
+            <td>{{ b.endDate | date:'mediumDate' }}</td>
+            <td>
+              <div class="amount-badge">
+                ₹{{ b.amount }}
+              </div>
+            </td>
+            <td>
+              <div class="status-badge" [class]="'status-' + b.status?.toLowerCase()">
+                {{ b.status }}
+              </div>
+            </td>
+            <td>
+              <div class="vocation-date">
+                {{ b.vocationDate ? (b.vocationDate | date:'mediumDate') : '-' }}
+              </div>
+            </td>
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button 
+                  nbButton 
+                  status="primary" 
+                  size="tiny" 
+                  (click)="editBooking(b)" 
+                  *ngIf="b.status != 'Cancelled'"
+                  class="action-btn">
+                  <nb-icon icon="edit-2-outline"></nb-icon>
+                  <span class="btn-text">Edit</span>
+                </button>
+                <button 
+                  nbButton 
+                  status="warning" 
+                  size="tiny" 
+                  (click)="openVocationModal(b)" 
+                  *ngIf="b.status != 'Cancelled'"
+                  class="action-btn">
+                  <nb-icon icon="calendar-outline"></nb-icon>
+                  <span class="btn-text">Vocate</span>
+                </button>
+                <button 
+                  nbButton 
+                  status="danger" 
+                  size="tiny" 
+                  (click)="deleteBooking(b)" 
+                  *ngIf="b.status != 'Cancelled'"
+                  class="action-btn">
+                  <nb-icon icon="close-outline"></nb-icon>
+                  <span class="btn-text">Cancel</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-view">
+      <nb-card *ngFor="let b of filteredBookings" class="booking-card">
+        <nb-card-body>
+          <div class="booking-card-header">
+            <div class="booking-title">
+              <nb-icon icon="calendar-outline" status="primary"></nb-icon>
+              <div class="title-content">
+                <h5>{{ getStudentName(b.studentId) }}</h5>
+                <span class="room-number">{{ getRoomNumber(b.roomId) }}</span>
+              </div>
+            </div>
+            <div class="booking-status">
+              <div class="status-badge" [class]="'status-' + b.status?.toLowerCase()">
+                {{ b.status }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="booking-details">
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="label">Tariff Period:</span>
+                <span class="value">{{ b.tariffPeriod }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Amount:</span>
+                <span class="value amount">₹{{ b.amount }}</span>
+              </div>
+            </div>
             
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <div class="detail-row">
+              <div class="detail-item">
+                <span class="label">Start Date:</span>
+                <span class="value">{{ b.startDate | date:'mediumDate' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">End Date:</span>
+                <span class="value">{{ b.endDate | date:'mediumDate' }}</span>
+              </div>
+            </div>
+
+            <div class="detail-item full-width">
+              <span class="label">Vocation Date:</span>
+              <span class="value">{{ b.vocationDate ? (b.vocationDate | date:'mediumDate') : 'Not set' }}</span>
+            </div>
+          </div>
+
+          <div class="card-actions" *ngIf="b.status != 'Cancelled'">
+            <button 
+              nbButton 
+              status="primary" 
+              size="small" 
+              (click)="editBooking(b)"
+              class="action-btn">
+              <nb-icon icon="edit-2-outline"></nb-icon>
+              Edit
+            </button>
+            <button 
+              nbButton 
+              status="warning" 
+              size="small" 
+              (click)="openVocationModal(b)"
+              class="action-btn">
+              <nb-icon icon="calendar-outline"></nb-icon>
+              Vocate
+            </button>
+            <button 
+              nbButton 
+              status="danger" 
+              size="small" 
+              (click)="deleteBooking(b)"
+              class="action-btn">
+              <nb-icon icon="close-outline"></nb-icon>
+              Cancel
+            </button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredBookings.length === 0" class="empty-state">
+      <nb-icon icon="calendar-outline" status="basic" class="empty-icon"></nb-icon>
+      <h4>No bookings found</h4>
+      <p *ngIf="searchQuery">Try adjusting your search criteria</p>
+      <button 
+        nbButton 
+        status="primary" 
+        (click)="addBooking()"
+        *ngIf="bookings.length === 0">
+        Create Your First Booking
+      </button>
+    </div>
   </nb-card-body>
 </nb-card>
 
 <!-- Vocation Modal -->
-<nb-card *ngIf="showVocationModal" style="position: fixed; top: 20%; left: 35%; width: 30%; z-index: 1000; padding:20px;">
-  <nb-card-header>Update Vocation</nb-card-header>
+<nb-card *ngIf="showVocationModal" class="vocation-modal">
+  <nb-card-header>
+    <h5>Update Vocation Date</h5>
+  </nb-card-header>
   <nb-card-body>
-    <input nbInput type="date" [(ngModel)]="vocationDate">
+    <div class="modal-content">
+      <p>Set vocation date for {{ selectedBooking ? getStudentName(selectedBooking.studentId) : '' }}</p>
+      <input 
+        nbInput 
+        fullWidth 
+        type="date" 
+        [(ngModel)]="vocationDate"
+        class="date-input">
+    </div>
   </nb-card-body>
-  <nb-card-footer>
-    <button nbButton status="primary" (click)="saveVocation()">Save</button>
-    <button nbButton status="danger" (click)="showVocationModal=false">Cancel</button>
+  <nb-card-footer class="modal-footer">
+    <button nbButton status="primary" (click)="saveVocation()" class="modal-btn">
+      Save Vocation
+    </button>
+    <button nbButton status="basic" (click)="showVocationModal = false" class="modal-btn">
+      Cancel
+    </button>
   </nb-card-footer>
 </nb-card>

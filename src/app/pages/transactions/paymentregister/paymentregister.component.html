@@ -1,103 +1,223 @@
-<form [formGroup]="filterForm" (ngSubmit)="submitFilter()">
-  <nb-card>
-    <nb-card-header class="fw-bold">Filters</nb-card-header>
-    <nb-card-body>
-      <div class="row g-2">
-        <div class="col-6 col-md-3">
-          <label class="fw-bold">Rooms</label>
-          <nb-select placeholder="Select Rooms" formControlName="rooms" multiple fullWidth>
-            <nb-option *ngFor="let room of rooms" [value]="room.Id">{{ room.Name }}</nb-option>
-          </nb-select>
-        </div>
+<!-- paymentregister.component.html -->
+<nb-card class="payment-register-card">
+  <nb-card-header class="payment-register-header">
+    <div class="header-content">
+      <h4>Payment Register</h4>
+    </div>
+  </nb-card-header>
 
-        <div class="col-6 col-md-3">
-          <label class="fw-bold">Students</label>
-          <nb-select placeholder="Select Students" formControlName="students" multiple fullWidth>
-            <nb-option *ngFor="let student of students" [value]="student.Id">{{ student.FullName }}</nb-option>
-          </nb-select>
-        </div>
+  <nb-card-body class="payment-register-body">
+    <!-- Filters Section -->
+    <form [formGroup]="filterForm" (ngSubmit)="submitFilter()">
+      <nb-card class="filter-card">
+        <nb-card-header class="filter-header">
+          <h5>Filters</h5>
+        </nb-card-header>
+        <nb-card-body class="filter-body">
+          <div class="filter-grid">
+            <div class="filter-item">
+              <label class="filter-label">Rooms</label>
+              <nb-select placeholder="Select Rooms" formControlName="rooms" multiple fullWidth>
+                <nb-option *ngFor="let room of rooms" [value]="room.Id">
+                  <div class="option-content">
+                    <nb-icon icon="home-outline"></nb-icon>
+                    {{ room.Name }}
+                  </div>
+                </nb-option>
+              </nb-select>
+            </div>
 
-        <div class="col-6 col-md-3">
-          <label class="fw-bold">From Date</label>
-          <input nbInput type="date" formControlName="fromDate" fullWidth>
-        </div>
+            <div class="filter-item">
+              <label class="filter-label">Students</label>
+              <nb-select placeholder="Select Students" formControlName="students" multiple fullWidth>
+                <nb-option *ngFor="let student of students" [value]="student.Id">
+                  <div class="option-content">
+                    <nb-icon icon="person-outline"></nb-icon>
+                    {{ student.FullName }}
+                  </div>
+                </nb-option>
+              </nb-select>
+            </div>
 
-        <div class="col-6 col-md-3">
-          <label class="fw-bold">To Date</label>
-          <input nbInput type="date" formControlName="toDate" fullWidth>
-        </div>
+            <div class="filter-item">
+              <label class="filter-label">From Date</label>
+              <input nbInput type="date" formControlName="fromDate" fullWidth>
+            </div>
+
+            <div class="filter-item">
+              <label class="filter-label">To Date</label>
+              <input nbInput type="date" formControlName="toDate" fullWidth>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button nbButton status="primary" type="submit" class="action-btn">
+              <nb-icon icon="search-outline"></nb-icon>
+              Apply Filters
+            </button>
+            <button nbButton status="success" type="button" (click)="exportPDF()" class="action-btn">
+              <nb-icon icon="download-outline"></nb-icon>
+              Export PDF
+            </button>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </form>
+
+    <!-- Results Section -->
+    <div *ngIf="payments.length > 0" class="results-section">
+      <div class="results-header">
+        <h5>Payment Results ({{ payments.length }} records)</h5>
       </div>
 
-      <button nbButton status="primary" type="submit" class="mt-3">Apply Filters</button>
-      <button nbButton status="success" type="button" class="mt-3 ms-2" (click)="exportPDF()">Export PDF</button>
-    </nb-card-body>
-  </nb-card>
-</form>
-
-<!-- Desktop Table -->
-<div class="payment-table d-none d-md-block mt-3">
-  <table class="table table-bordered table-striped">
-    <thead>
-      <tr>
-        <th class="fw-bold">Date</th>
-        <th class="fw-bold">Student</th>
-        <th class="fw-bold">Room</th>
-        <th class="fw-bold">Payment Type</th>
-        <th class="fw-bold">Payment Mode</th>
-        <th class="fw-bold text-end">Amount</th>
-        <th class="fw-bold">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let pay of payments">
-        <td>{{ pay.paymentDate | date:'shortDate' }}</td>
-        <td>{{ pay.studentName }}</td>
-        <td>{{ pay.roomNo }}</td>
-        <td>{{ pay.paymentType }}</td>
-        <td>{{ pay.paymentMode }}</td>
-        <td class="text-end">{{ pay.paymentAmount | number:'1.2-2' }}</td>
-        <td [ngClass]="getStatusClass(pay.paymentStatus)">
-          {{ pay.paymentStatus }}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- Mobile Cards -->
-<div class="payment-cards d-md-none mt-3">
-  <nb-card *ngFor="let pay of payments" class="mb-2">
-    <nb-card-body>
-      <div class="fw-bold">{{ pay.studentName }} - {{ pay.roomNo }}</div>
-      <div>{{ pay.paymentDate | date:'shortDate' }} | {{ pay.paymentType }} | {{ pay.paymentMode }}</div>
-      <div class="text-end fw-bold">
-        Amount: {{ pay.paymentAmount | number:'1.2-2' }}
-        (<span [ngClass]="getStatusClass(pay.paymentStatus)">{{ pay.paymentStatus }}</span>)
+      <!-- Desktop Table -->
+      <div class="table-container desktop-view">
+        <table class="payments-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Student</th>
+              <th>Room</th>
+              <th>Payment Type</th>
+              <th>Payment Mode</th>
+              <th class="amount-column">Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pay of payments">
+              <td>
+                <div class="payment-date">
+                  <nb-icon icon="calendar-outline"></nb-icon>
+                  {{ pay.paymentDate | date:'mediumDate' }}
+                </div>
+              </td>
+              <td>
+                <div class="student-info">
+                  <nb-icon icon="person-outline"></nb-icon>
+                  {{ pay.studentName }}
+                </div>
+              </td>
+              <td>
+                <div class="room-info">
+                  <nb-icon icon="home-outline"></nb-icon>
+                  {{ pay.roomNo }}
+                </div>
+              </td>
+              <td>{{ pay.paymentType }}</td>
+              <td>{{ pay.paymentMode }}</td>
+              <td class="amount-cell">
+                <div class="amount-badge">
+                  {{ pay.paymentAmount | currency:'INR' }}
+                </div>
+              </td>
+              <td>
+                <div class="status-badge" [ngClass]="getStatusClass(pay.paymentStatus)">
+                  {{ pay.paymentStatus }}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div *ngIf="pay.roomRents?.length">
-        <div class="mt-2 fw-bold">Room Rent Paid</div>
-        <div *ngFor="let r of pay.roomRents" class="d-flex justify-content-between">
-          <span>{{r.Month}} (Bill {{r.BillNo}})</span>
-          <span>{{r.Amount | number:'1.2-2'}}</span>
-        </div>
-      </div>
+      <!-- Mobile Cards -->
+      <div class="mobile-view">
+        <nb-card *ngFor="let pay of payments" class="payment-card">
+          <nb-card-body>
+            <div class="payment-card-header">
+              <div class="payment-title">
+                <nb-icon icon="credit-card-outline" status="primary"></nb-icon>
+                <div class="title-content">
+                  <h6>{{ pay.studentName }}</h6>
+                  <span class="room-number">Room {{ pay.roomNo }}</span>
+                </div>
+              </div>
+              <div class="payment-status">
+                <div class="status-badge" [ngClass]="getStatusClass(pay.paymentStatus)">
+                  {{ pay.paymentStatus }}
+                </div>
+              </div>
+            </div>
 
-      <div *ngIf="pay.otherCharges?.length">
-        <div class="mt-2 fw-bold">Other Charges</div>
-        <div *ngFor="let c of pay.otherCharges" class="d-flex justify-content-between">
-          <span>{{c.particulars}}</span>
-          <span>{{c.amount | number:'1.2-2'}}</span>
-        </div>
-      </div>
+            <div class="payment-details">
+              <div class="detail-row">
+                <div class="detail-item">
+                  <span class="label">Date:</span>
+                  <span class="value">
+                    <nb-icon icon="calendar-outline"></nb-icon>
+                    {{ pay.paymentDate | date:'mediumDate' }}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Amount:</span>
+                  <span class="value amount">{{ pay.paymentAmount | currency:'INR' }}</span>
+                </div>
+              </div>
+              
+              <div class="detail-row">
+                <div class="detail-item">
+                  <span class="label">Type:</span>
+                  <span class="value">{{ pay.paymentType }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Mode:</span>
+                  <span class="value">{{ pay.paymentMode }}</span>
+                </div>
+              </div>
+            </div>
 
-      <div *ngIf="pay.advances?.length">
-        <div class="mt-2 fw-bold">Advance Paid</div>
-        <div *ngFor="let a of pay.advances" class="d-flex justify-content-between">
-          <span>{{ a.createdAt | date:'shortDate' }}</span>
-          <span>{{ a.amount | number:'1.2-2'}}</span>
-        </div>
+            <!-- Room Rents -->
+            <div *ngIf="pay.roomRents?.length" class="payment-section">
+              <div class="section-title">
+                <nb-icon icon="home-outline"></nb-icon>
+                Room Rent Paid
+              </div>
+              <div class="section-content">
+                <div *ngFor="let r of pay.roomRents" class="section-item">
+                  <span class="item-label">{{ r.Month }} (Bill {{ r.BillNo }})</span>
+                  <span class="item-value">{{ r.Amount | currency:'INR' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Other Charges -->
+            <div *ngIf="pay.otherCharges?.length" class="payment-section">
+              <div class="section-title">
+                <nb-icon icon="list-outline"></nb-icon>
+                Other Charges
+              </div>
+              <div class="section-content">
+                <div *ngFor="let c of pay.otherCharges" class="section-item">
+                  <span class="item-label">{{ c.particulars }}</span>
+                  <span class="item-value">{{ c.amount | currency:'INR' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advances -->
+            <div *ngIf="pay.advances?.length" class="payment-section">
+              <div class="section-title">
+                <nb-icon icon="trending-up-outline"></nb-icon>
+                Advance Paid
+              </div>
+              <div class="section-content">
+                <div *ngFor="let a of pay.advances" class="section-item">
+                  <span class="item-label">{{ a.createdAt | date:'mediumDate' }}</span>
+                  <span class="item-value">{{ a.amount | currency:'INR' }}</span>
+                </div>
+              </div>
+            </div>
+          </nb-card-body>
+        </nb-card>
       </div>
-    </nb-card-body>
-  </nb-card>
-</div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="payments.length === 0" class="empty-state">
+      <nb-icon icon="credit-card-outline" status="basic" class="empty-icon"></nb-icon>
+      <h5>No payments found</h5>
+      <p>Try adjusting your filter criteria</p>
+    </div>
+  </nb-card-body>
+</nb-card>

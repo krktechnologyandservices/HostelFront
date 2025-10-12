@@ -1,4 +1,4 @@
-
+// payments.component.ts
 import { Component, OnInit, NgZone } from '@angular/core';
 import { NbToastrService } from '@nebular/theme';
 import { PaymentService, PaymentView } from './payments.service';
@@ -327,23 +327,6 @@ export class PaymentListComponent implements OnInit {
     });
   }
 
-  // // --- Generate QR code with signed verification URL ---
-  // private async generateSignedQrForPayment(payment: any): Promise<string> {
-  //   const secretKey = 'mySecretKey123'; // should match backend verification
-  //   const payload = `${payment.paymentId}|${payment.paymentAmount}|${payment.paymentDate}`;
-  //   const signature = this.hashString(payload + secretKey);
-
-  //   const verificationUrl = `${environment.apiBaseUrl}/verify?paymentId=${payment.paymentId}&amount=${payment.paymentAmount}&date=${encodeURIComponent(payment.paymentDate)}&sig=${signature}`;
-
-  //   try {
-  //     const qrDataUrl = await QRCode.toDataURL(verificationUrl, { width: 200 });
-  //     return qrDataUrl;
-  //   } catch (err) {
-  //     console.error('QR code generation failed', err);
-  //     throw err;
-  //   }
-  // }
-
   private async generateSignedQrForPayment(payment: any): Promise<string> {
     const secretKey = 'mySecretKey123'; // must match backend
 
@@ -358,19 +341,5 @@ export class PaymentListComponent implements OnInit {
 
     // --- generate QR ---
     return await QRCode.toDataURL(verificationUrl, { width: 200 });
-}
-
-  // --- Simple hash function for signature ---
-  private hashString(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return hash.toString(16);
   }
-
-
-  
-  
 }

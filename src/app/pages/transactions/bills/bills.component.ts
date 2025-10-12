@@ -1,3 +1,4 @@
+// bills.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Bill, BillingService } from './billsservice.service';
 import { NbDialogService } from '@nebular/theme';
