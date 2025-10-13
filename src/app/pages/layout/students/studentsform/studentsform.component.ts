@@ -1,3 +1,4 @@
+// studentsform.component.ts (updated with minor improvements)
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StudentService, Student } from '../students.service';
@@ -39,17 +40,16 @@ export class StudentsFormComponent implements OnInit {
     // Initialize form
     this.studentForm = this.fb.group({
       studentId: [null],
-      fullName: ['', Validators.required],
-      //email: ['' ],
-       email: ['', Validators.email],
-      phone: ['', Validators.required],
-      guardianAlternativeMobile: [''],
+      fullName: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.email]],
+      phone: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s()]{10,}$/)]],
+      guardianAlternativeMobile: ['', [Validators.pattern(/^[0-9+\-\s()]{10,}$/)]],
       dob: [''],
       gender: [''],
       address: [''],
       guardianName: [''],
-      guardianPhone: [''],
-      relationship: [''],  // 👈 Added relationship
+      guardianPhone: ['', [Validators.pattern(/^[0-9+\-\s()]{10,}$/)]],
+      relationship: [''],
       admissionDate: [''],
       bloodGroup: [''],
       courseName: [''],
@@ -57,7 +57,6 @@ export class StudentsFormComponent implements OnInit {
       roomId: [null],
       billingMode: [''],
       roomNO: [''],
-
     });
 
     // Load room list for dropdown
@@ -92,13 +91,13 @@ export class StudentsFormComponent implements OnInit {
             address: data.address,
             guardianName: data.guardianName,
             guardianPhone: data.guardianPhone,
-            relationship: data.relationship,   // 👈 Added relationship
+            relationship: data.relationship,
             admissionDate: this.formatDateForInput(data.admissionDate),
             bloodGroup: data.bloodGroup,
-            courseName: data.courseName  || '',
+            courseName: data.courseName || '',
             idProof: data.idProof,
             roomId: data.roomId,
-            guardianAlternativeMobile:data.guardianAlternativeMobile
+            guardianAlternativeMobile: data.guardianAlternativeMobile
           });
         },
         error: (err) => console.error('Error loading student', err)
@@ -116,13 +115,17 @@ export class StudentsFormComponent implements OnInit {
   
   // Save or update student
   save(): void {
-    if (this.studentForm.invalid){ console.warn('❌ Form is invalid');
-    console.log(this.studentForm.value);       // Show current values
-    console.log(this.studentForm.errors);      // Show top-level form errors (usually null)
-    console.log(this.studentForm.status);      // VALID or INVALID
-    this.logInvalidControls();                 // 👈 Custom helper below
-    return;
-  }
+    if (this.studentForm.invalid) { 
+      console.warn('❌ Form is invalid');
+      console.log(this.studentForm.value);
+      console.log(this.studentForm.errors);
+      console.log(this.studentForm.status);
+      this.logInvalidControls();
+      
+      // Mark all fields as touched to show validation errors
+      this.markFormGroupTouched();
+      return;
+    }
 
     const student: Student = this.studentForm.value;
 
@@ -139,6 +142,13 @@ export class StudentsFormComponent implements OnInit {
     }
   }
 
+  private markFormGroupTouched() {
+    Object.keys(this.studentForm.controls).forEach(key => {
+      const control = this.studentForm.get(key);
+      control?.markAsTouched();
+    });
+  }
+
   private logInvalidControls(): void {
     Object.keys(this.studentForm.controls).forEach(key => {
       const control = this.studentForm.get(key);
@@ -148,7 +158,6 @@ export class StudentsFormComponent implements OnInit {
     });
   }
   
-
   // Cancel and navigate back
   cancel(): void {
     this.router.navigate(['pages/master/students']);
