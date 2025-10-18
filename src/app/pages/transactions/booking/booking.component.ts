@@ -1,7 +1,7 @@
 // bookings.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { BookingService, Booking } from '../booking/booking.service';
+import { BookingService, Booking, VocationData } from '../booking/booking.service';
 import { StudentService, Student } from '../../layout/students/students.service';
 import { RoomService, Room } from '../../layout/rooms/rooms.service';
 
@@ -17,10 +17,14 @@ export class BookingComponent implements OnInit {
   rooms: Room[] = [];
   searchQuery = '';
 
-  // Vocation
+  // Vocation modal properties
   selectedBooking: Booking | null = null;
-  showVocationModal = false;
+  selectedVocationType: 'Temporary' | 'Permanent' | null = null;
   vocationDate: string = '';
+  returnDate: string = '';
+  vocationReason: string = '';
+  minDate: string = new Date().toISOString().split('T')[0];
+  showVocationModal = false;
 
   constructor(
     private bookingService: BookingService,
@@ -42,12 +46,14 @@ export class BookingComponent implements OnInit {
     });
   }
 
-  getStudentName(id: number) {
-    return this.students.find(s => s.studentId === id)?.fullName || '';
+  getStudentName(id?: number) {
+    if (!id) return 'Unknown Student';
+    return this.students.find(s => s.studentId === id)?.fullName || 'Unknown Student';
   }
 
-  getRoomNumber(id: number) {
-    return this.rooms.find(r => r.id === id)?.roomNumber || '';
+  getRoomNumber(id?: number) {
+    if (!id) return 'Unknown Room';
+    return this.rooms.find(r => r.id === id)?.roomNumber || 'Unknown Room';
   }
 
   search() {
@@ -60,7 +66,8 @@ export class BookingComponent implements OnInit {
           this.getStudentName(b.studentId).toLowerCase().includes(q) ||
           this.getRoomNumber(b.roomId).toLowerCase().includes(q) ||
           b.tariffPeriod.toLowerCase().includes(q) ||
-          (b.status || '').toLowerCase().includes(q)
+          (b.status || '').toLowerCase().includes(q) ||
+          (b.vocationReason || '').toLowerCase().includes(q)
       );
     }
   }
@@ -88,24 +95,89 @@ export class BookingComponent implements OnInit {
     }
   }
 
-  // ------------------ VOCATION ------------------
+  // ------------------ VOCATION MODAL METHODS ------------------
 
-  openVocationModal(b: Booking) {
-    this.selectedBooking = b;
-    this.vocationDate = b.vocationDate ? new Date(b.vocationDate).toISOString().substring(0,10) : '';
+  openVocationModal(booking: Booking) {
+    this.selectedBooking = booking;
+    this.vocationDate = booking.vocationDate ? new Date(booking.vocationDate).toISOString().substring(0, 10) : '';
+    this.selectedVocationType = booking.vocationType as 'Temporary' | 'Permanent' || null;
+    this.returnDate = booking.returnDate ? new Date(booking.returnDate).toISOString().substring(0, 10) : '';
+    this.vocationReason = booking.vocationReason || '';
     this.showVocationModal = true;
+    this.preventBodyScroll();
+  }
+
+  closeVocationModal() {
+    this.showVocationModal = false;
+    this.restoreBodyScroll();
+    this.resetVocationModal();
   }
 
   saveVocation() {
-    if (!this.selectedBooking) return;
+    if (!this.selectedBooking || !this.vocationDate || !this.selectedVocationType) {
+      return;
+    }
 
-    this.bookingService.updateVocation(this.selectedBooking.id!, {
+    // Validate vocation reason length
+    if (this.vocationReason && this.vocationReason.length > 200) {
+      alert('Vocation reason cannot exceed 200 characters.');
+      return;
+    }
+
+    const vocationData: VocationData = {
       vocationDate: this.vocationDate,
-      status: 'Vocate'
-    }).subscribe(() => {
-      this.loadData();
-      this.showVocationModal = false;
-      this.selectedBooking = null;
+      vocationType: this.selectedVocationType,
+      returnDate: this.selectedVocationType === 'Temporary' ? this.returnDate : null,
+      vocationReason: this.vocationReason || null,
+      status: this.selectedVocationType === 'Permanent' ? 'Completed' : 'Vocate'
+    };
+
+    this.bookingService.updateVocation(this.selectedBooking.id!, vocationData).subscribe({
+      next: () => {
+        this.loadData();
+        this.closeVocationModal();
+        this.showSuccessNotification();
+      },
+      error: (error) => {
+        console.error('Error updating vocation:', error);
+        this.showErrorNotification();
+      }
     });
+  }
+
+  private resetVocationModal() {
+    this.selectedBooking = null;
+    this.selectedVocationType = null;
+    this.vocationDate = '';
+    this.returnDate = '';
+    this.vocationReason = '';
+  }
+
+  // Method to prevent body scroll when modal opens
+  private preventBodyScroll() {
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Method to restore body scroll when modal closes  
+  private restoreBodyScroll() {
+    document.body.style.overflow = '';
+  }
+
+  private showSuccessNotification() {
+    const message = this.selectedVocationType === 'Temporary' 
+      ? 'Temporary vocation updated successfully!' 
+      : 'Permanent vocation processed successfully!';
+    
+    alert(message);
+  }
+
+  private showErrorNotification() {
+    alert('Failed to update vocation. Please try again.');
+  }
+
+  // Helper method to truncate long text
+  truncateText(text: string, maxLength: number): string {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   }
 }

@@ -12,7 +12,23 @@ export interface Booking {
   endDate: string;
   status?: string;
   amount?: number;
-  vocationDate?:Date;
+  nextBillingDate?: string;
+  isTemporary?: boolean;
+  vocationDate?: string;
+  vocationType?: string;
+  returnDate?: string;
+  vocationReason?: string;
+  remarks?: string;
+  studentName?: string;
+  roomNumber?: string;
+}
+
+export interface VocationData {
+  vocationDate: string;
+  vocationType: 'Temporary' | 'Permanent';
+  returnDate?: string | null;
+  vocationReason?: string | null;
+  status: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -44,14 +60,16 @@ export class BookingService {
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.api}/${id}`);
   }
-  updateVocation(id: number, data: { vocationDate?: string; status: string }) {
+
+  updateVocation(id: number, data: VocationData): Observable<any> {
     return this.http.put(`${this.api}/${id}/vocation`, data);
   }
 
   getByStudent(studentId: number): Observable<Booking[]> {
     return this.http.get<Booking[]>(`${this.api}/by-student?studentId=${studentId}`);
-
   }
 
-  
+  search(term: string): Observable<Booking[]> {
+    return this.http.get<Booking[]>(`${this.api}/search?term=${encodeURIComponent(term)}`);
+  }
 }
