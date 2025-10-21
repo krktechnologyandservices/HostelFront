@@ -209,71 +209,244 @@ export class PaymentRegisterComponent implements OnInit, OnDestroy {
       console.warn('No payments to export');
       return;
     }
-
+  
     try {
       const doc = new jsPDF.default('p', 'pt', 'a4');
-      let yPos = 70;
+      let yPos = 80;
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      const currentDate = new Date().toLocaleDateString();
-
+      const margin = 40; // Consistent margin for better layout
+      const contentWidth = pageWidth - (2 * margin); // Calculate content width
+      
+      const currentDate = new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      const currentTime = new Date().toLocaleTimeString();
+  
       // Load logo as Base64
       const logoData = await this.getImageAsBase64('assets/images/DaleViewLogo.jpg');
-
-      // Header with Logo
+  
+      // Modern color scheme
+      const colors = {
+        primary: [41, 128, 185],
+        secondary: [52, 73, 94],
+        accent: [46, 204, 113],
+        warning: [241, 196, 15],
+        lightBg: [248, 249, 250],
+        border: [234, 236, 238]
+      };
+  
+      // Calculate payment mode breakdown
+      const paymentModeBreakdown = this.calculatePaymentModeBreakdown();
+      const totalAmount = this.payments.reduce((sum, pay) => sum + (pay.paymentAmount || 0), 0);
+  
+      // Modern header
       const drawHeader = () => {
-        const logoWidth = 60;
-        const logoHeight = 30;
-
+        // Header background
+        doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+        doc.rect(0, 0, pageWidth, 60, 'F');
+  
+        // Logo
         if (logoData) {
-          doc.addImage(logoData, 'JPEG', 40, 10, logoWidth, logoHeight);
+          doc.addImage(logoData, 'JPEG', 30, 15, 40, 20);
         }
-
+  
         // Title
-        doc.setFontSize(14).setFont("helvetica", "bold");
-        doc.text("Dale View Hostel", pageWidth / 2, 30, { align: "center" });
+        doc.setFontSize(16).setFont("helvetica", "bold");
+        doc.setTextColor(255, 255, 255);
+        doc.text("DALE VIEW HOSTEL", pageWidth / 2, 25, { align: "center" });
+        
         doc.setFontSize(12).setFont("helvetica", "normal");
-        doc.text("Payment Register", pageWidth / 2, 48, { align: "center" });
-
-        // Date
+        doc.text("PAYMENT REGISTER", pageWidth / 2, 42, { align: "center" });
+  
+        // Date and time
         doc.setFontSize(9);
-        doc.text(`Generated on: ${currentDate}`, pageWidth - 40, 30, { align: "right" });
-
-        yPos = 70;
+        doc.text(`Generated: ${currentDate} | ${currentTime}`, pageWidth - 30, 45, { align: "right" });
+  
+        yPos = 80;
       };
-
-      // Footer
+  
+      // Modern footer
       const drawFooter = (pageNumber: number) => {
-        doc.setFontSize(9).setTextColor(100);
-        doc.text(`Page ${pageNumber}`, pageWidth - 50, pageHeight - 20);
+        doc.setFillColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+        doc.rect(0, pageHeight - 30, pageWidth, 30, 'F');
+        
+        doc.setFontSize(8).setTextColor(255, 255, 255);
+        doc.text(`Page ${pageNumber}`, pageWidth / 2, pageHeight - 15, { align: "center" });
+        doc.text("Dale View Hostel - Confidential", pageWidth / 2, pageHeight - 8, { align: "center" });
       };
-
+  
       let currentPage = 1;
       drawHeader();
       drawFooter(currentPage);
-
-      // Section drawer (tables)
-      const drawSection = (title: string, head: string[], body: any[], totalLabel?: string, totalValue?: number) => {
+  
+      // Summary section
+      const paidCount = this.payments.filter(pay => pay.paymentStatus === 'Paid').length;
+      const pendingCount = this.payments.filter(pay => pay.paymentStatus === 'Pending').length;
+  
+      // Summary cards
+      const drawSummaryCards = () => {
+        const cardWidth = (contentWidth) / 4; // Use contentWidth instead of pageWidth
+        const cardHeight = 45;
+        const startX = margin;
+  
+        // Total Payments Card
+        doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+        doc.rect(startX, yPos, cardWidth, cardHeight, 'F');
+        doc.setFontSize(10).setTextColor(255, 255, 255);
+        doc.text("TOTAL PAYMENTS", startX + 15, yPos + 15);
+        doc.setFontSize(12).setFont("helvetica", "bold");
+        doc.text(this.payments.length.toString(), startX + 15, yPos + 30);
+  
+        // Total Amount Card
+        doc.setFillColor(colors.accent[0], colors.accent[1], colors.accent[2]);
+        doc.rect(startX + cardWidth + 10, yPos, cardWidth, cardHeight, 'F');
+        doc.setFontSize(10).setTextColor(255, 255, 255);
+        doc.text("TOTAL AMOUNT", startX + cardWidth + 25, yPos + 15);
+        doc.setFontSize(12).setFont("helvetica", "bold");
+        doc.text(`₹${totalAmount.toFixed(2)}`, startX + cardWidth + 25, yPos + 30);
+  
+        // Status Card
+        doc.setFillColor(colors.warning[0], colors.warning[1], colors.warning[2]);
+        doc.rect(startX + (cardWidth + 10) * 2, yPos, cardWidth, cardHeight, 'F');
+        doc.setFontSize(10).setTextColor(255, 255, 255);
+        doc.text("PAID/PENDING", startX + (cardWidth + 10) * 2 + 15, yPos + 15);
+        doc.setFontSize(10).setFont("helvetica", "bold");
+        doc.text(`${paidCount}/${pendingCount}`, startX + (cardWidth + 10) * 2 + 15, yPos + 30);
+  
+        // Payment Modes Count Card
+        doc.setFillColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+        doc.rect(startX + (cardWidth + 10) * 3, yPos, cardWidth, cardHeight, 'F');
+        doc.setFontSize(10).setTextColor(255, 255, 255);
+        doc.text("PAYMENT MODES", startX + (cardWidth + 10) * 3 + 15, yPos + 15);
+        doc.setFontSize(10).setFont("helvetica", "bold");
+        doc.text(Object.keys(paymentModeBreakdown).length.toString(), startX + (cardWidth + 10) * 3 + 15, yPos + 30);
+  
+        yPos += cardHeight + 20;
+      };
+  
+      drawSummaryCards();
+  
+      // Payment Mode Breakdown Section
+      const drawPaymentModeBreakdown = () => {
+        // Section header
+        doc.setFillColor(colors.lightBg[0], colors.lightBg[1], colors.lightBg[2]);
+        doc.rect(margin, yPos, contentWidth, 20, 'F');
+        doc.setFontSize(11).setFont("helvetica", "bold");
+        doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+        doc.text("PAYMENT MODE BREAKDOWN", margin + 10, yPos + 13);
+  
+        yPos += 25;
+  
+        // Create table data
+        const breakdownData = Object.entries(paymentModeBreakdown).map(([mode, data]: [string, any]) => [
+          mode,
+          data.count.toString(),
+          `₹${data.amount.toFixed(2)}`,
+          `${((data.amount / totalAmount) * 100).toFixed(1)}%`
+        ]);
+  
+        // Add total row
+        breakdownData.push([
+          { content: "TOTAL", styles: { fontStyle: 'bold' } },
+          { content: this.payments.length.toString(), styles: { fontStyle: 'bold' } },
+          { content: `₹${totalAmount.toFixed(2)}`, styles: { fontStyle: 'bold' } },
+          { content: "100%", styles: { fontStyle: 'bold' } }
+        ]);
+  
+        // Calculate column widths to fit content
+        const colWidths = [contentWidth * 0.4, contentWidth * 0.2, contentWidth * 0.2, contentWidth * 0.2];
+        
         autoTable(doc, {
           startY: yPos,
-          head: [[title]],
-          body: [],
-          theme: "plain",
-          headStyles: { fillColor: [240,240,240], halign: "left", fontSize: 10, fontStyle: "bold", textColor: [0,0,0] },
-          margin: { left: 40, right: 40 },
+          head: [["Payment Mode", "Count", "Amount", "Percentage"]],
+          body: breakdownData,
+          theme: "grid",
+          styles: { 
+            fontSize: 8, // Reduced font size to fit better
+            cellPadding: 4,
+            lineWidth: 0.3,
+            overflow: 'linebreak'
+          },
+          headStyles: { 
+            fillColor: [colors.secondary[0], colors.secondary[1], colors.secondary[2]],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            halign: "center"
+          },
+          alternateRowStyles: { 
+            fillColor: [colors.lightBg[0], colors.lightBg[1], colors.lightBg[2]] 
+          },
+          margin: { left: margin, right: margin },
+          columnStyles: {
+            0: { cellWidth: colWidths[0] },
+            1: { cellWidth: colWidths[1], halign: 'center' },
+            2: { cellWidth: colWidths[2], halign: 'right' },
+            3: { cellWidth: colWidths[3], halign: 'right' }
+          },
+          didDrawPage: (data) => {
+            yPos = data.cursor.y + 15;
+          }
         });
-
+  
+        yPos += 10;
+      };
+  
+      // Draw payment mode breakdown
+      drawPaymentModeBreakdown();
+  
+      // Calculate fixed widths for tables
+      const tableWidth = contentWidth;
+      const col1Width = tableWidth * 0.85;
+      const col2Width = tableWidth * 0.15;
+  
+      // Modern section drawer for payment details
+      const drawSection = (title: string, head: string[], body: any[], totalLabel?: string, totalValue?: number) => {
+        // Check if we need a new page
+        if (yPos > pageHeight - 150) {
+          doc.addPage();
+          currentPage++;
+          drawHeader();
+          drawFooter(currentPage);
+          yPos = 80;
+        }
+  
+        // Section header
+        doc.setFillColor(colors.lightBg[0], colors.lightBg[1], colors.lightBg[2]);
+        doc.rect(margin, yPos, contentWidth, 20, 'F');
+        doc.setFontSize(11).setFont("helvetica", "bold");
+        doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+        doc.text(title.toUpperCase(), margin + 10, yPos + 13);
+  
+        yPos += 25;
+  
+        // Table with compatible styling
         autoTable(doc, {
-          startY: (doc as any).lastAutoTable.finalY + 2,
+          startY: yPos,
           head: [head],
           body: body,
           theme: "grid",
-          styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.2 },
-          headStyles: { fillColor: [220,220,220], textColor: [0,0,0], fontStyle: "bold" },
-          alternateRowStyles: { fillColor: [248,248,248] },
-          margin: { left: 40, right: 40 },
+          styles: { 
+            fontSize: 7, // Reduced font size to fit content
+            cellPadding: 3,
+            lineWidth: 0.5,
+            font: "helvetica",
+            overflow: 'linebreak'
+          },
+          headStyles: { 
+            fillColor: [colors.secondary[0], colors.secondary[1], colors.secondary[2]],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            halign: "center"
+          },
+          alternateRowStyles: { 
+            fillColor: [colors.lightBg[0], colors.lightBg[1], colors.lightBg[2]] 
+          },
+          margin: { left: margin, right: margin },
           didDrawPage: (data) => {
-            yPos = data.cursor.y + 8;
+            yPos = data.cursor.y + 12;
             if (doc.getNumberOfPages() > currentPage) {
               currentPage = doc.getNumberOfPages();
               drawHeader();
@@ -281,105 +454,200 @@ export class PaymentRegisterComponent implements OnInit, OnDestroy {
             }
           },
         });
-
+  
+        // Total row with fixed widths
         if (totalLabel && totalValue !== undefined) {
           autoTable(doc, {
             startY: (doc as any).lastAutoTable.finalY,
-            body: [[`${totalLabel}`, "", "", "", totalValue.toFixed(2)]],
+            body: [[
+              { content: `${totalLabel}`, styles: { fontStyle: 'bold', halign: 'right' } },
+              { content: `₹${totalValue.toFixed(2)}`, styles: { fontStyle: 'bold', halign: 'right' } }
+            ]],
             theme: "grid",
-            styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.2, fontStyle: "bold" },
-            bodyStyles: { fillColor: [240,240,240] },
-            margin: { left: 40, right: 40 },
+            styles: { 
+              fontSize: 8, 
+              cellPadding: 4,
+              lineWidth: 0.5
+            },
+            bodyStyles: { 
+              fillColor: [colors.primary[0], colors.primary[1], colors.primary[2]],
+              textColor: [255, 255, 255]
+            },
+            margin: { left: margin, right: margin },
+            columnStyles: {
+              0: { cellWidth: col1Width },
+              1: { cellWidth: col2Width, halign: 'right' }
+            }
           });
-          yPos = (doc as any).lastAutoTable.finalY + 10;
+          yPos = (doc as any).lastAutoTable.finalY + 15;
         }
       };
-
+  
       // Loop through payments
       this.payments.forEach((pay, index) => {
-        // Student/payment info table
+        // Check if we need a new page
+        if (yPos > pageHeight - 150) {
+          doc.addPage();
+          currentPage++;
+          drawHeader();
+          drawFooter(currentPage);
+          yPos = 80;
+        }
+  
+        // Format payment number to 5 digits with leading zeros
+        const formattedPaymentNo = (pay.paymentNo || (index + 1)).toString().padStart(5, '0');
+  
+        // Payment card header
+        doc.setFillColor(colors.lightBg[0], colors.lightBg[1], colors.lightBg[2]);
+        doc.rect(margin, yPos, contentWidth, 25, 'F');
+        doc.setFontSize(10).setFont("helvetica", "bold");
+        doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+        doc.text(`PAYMENT ${formattedPaymentNo}`, margin + 10, yPos + 16);
+  
+        yPos += 35;
+  
+        // Payment info - using simple array format for compatibility
+        // Updated to include remarks field
+        const paymentInfo = [
+          [
+            `Student: ${pay.studentName}`,
+            `Room: ${pay.roomNo}`,
+            `Date: ${new Date(pay.paymentDate).toLocaleDateString()}`
+          ],
+          [
+            `Amount: ₹${pay.paymentAmount?.toFixed(2) || '0.00'}`,
+            `Type: ${pay.paymentType}`,
+            `Mode: ${pay.paymentMode}`
+          ],
+          [
+            `Status: ${pay.paymentStatus}`,
+            `Ref: ${pay.referenceNumber || 'N/A'}`,
+            `Remarks: ${pay.remarks || 'N/A'}`
+          ]
+        ];
+  
         autoTable(doc, {
           startY: yPos,
-          body: [
-            [
-              { content: `S.No: ${index+1}`, styles: { halign: "left", fontStyle: "bold" } },
-              { content: `Date: ${new Date(pay.paymentDate).toLocaleDateString()}`, styles: { halign: "left" } },
-              { content: `Student: ${pay.studentName}`, styles: { halign: "left" } },
-            ],
-            [
-              { content: `Room: ${pay.roomNo}`, styles: { halign: "left" } },
-              { content: `Type: ${pay.paymentType}`, styles: { halign: "left" } },
-              { content: `Mode: ${pay.paymentMode}`, styles: { halign: "left" } },
-            ],
-            [
-              { content: `Amount: ${pay.paymentAmount?.toFixed(2) || '0.00'}`, styles: { halign: "left" } },
-              { content: `Status: ${pay.paymentStatus}`, styles: { halign: "left" } },
-              { content: "", styles: { halign: "left" } },
-            ],
-          ],
+          body: paymentInfo,
           theme: "grid",
-          styles: { fontSize: 9, cellPadding: 3, lineWidth: 0.2 },
-          margin: { left: 40, right: 40 },
-          bodyStyles: { fillColor: [250,250,250] },
+          styles: { 
+            fontSize: 8, // Reduced font size
+            cellPadding: 4,
+            lineWidth: 0.3,
+            minCellHeight: 12,
+            overflow: 'linebreak'
+          },
+          margin: { left: margin, right: margin },
+          columnStyles: {
+            0: { cellWidth: contentWidth / 3 },
+            1: { cellWidth: contentWidth / 3 },
+            2: { cellWidth: contentWidth / 3 }
+          }
         });
-
-        yPos = (doc as any).lastAutoTable.finalY + 10;
-
-        // Sections
+  
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+  
+        // Sections with updated period format for room rents
         if (pay.roomRents?.length) {
-          const body = pay.roomRents.map((r: any, idx: number) => [idx+1, r.BillNo, r.RoomNo, r.Month, (r.Amount || 0).toFixed(2)]);
-          const total = pay.roomRents.reduce((a: number, b: any) => a + (b.Amount || 0), 0);
-          drawSection("Room Rent Paid", ["S.No","BillNo","Room","Month","Amount"], body, "Total Rent", total);
+          const body = pay.roomRents.map((r: any, idx: number) => [
+            (idx + 1).toString(), 
+            r.billNo || '', 
+            r.roomNo || '',
+            r.rentFrom && r.rentTo 
+              ? `${new Date(r.rentFrom).toLocaleDateString()} - ${new Date(r.rentTo).toLocaleDateString()}`
+              : 'N/A',
+            `₹${(r.amount || 0).toFixed(2)}`
+          ]);
+          const total = pay.roomRents.reduce((a: number, b: any) => a + (b.amount || 0), 0);
+          drawSection("Room Rent Paid", ["S.No", "Bill No", "Room", "Period", "Amount"], body, "Total Rent", total);
         }
-
+  
         if (pay.otherCharges?.length) {
-          const body = pay.otherCharges.map((c: any, idx: number) => [idx+1, c.particulars,"","","",(c.amount || 0).toFixed(2)]);
+          const body = pay.otherCharges.map((c: any, idx: number) => [
+            (idx + 1).toString(), 
+            c.particulars || '', 
+            `₹${(c.amount || 0).toFixed(2)}`
+          ]);
           const total = pay.otherCharges.reduce((a: number, b: any) => a + (b.amount || 0), 0);
-          drawSection("Other Charges", ["S.No","Particulars","","","Amount"], body, "Total Other Charges", total);
+          drawSection("Other Charges", ["S.No", "Particulars", "Amount"], body, "Total Other Charges", total);
         }
-
+  
         if (pay.advances?.length) {
-          const body = pay.advances.map((a: any, idx: number) => [idx+1, new Date(a.createdAt).toLocaleDateString(),"","","", (a.amount || 0).toFixed(2)]);
+          const body = pay.advances.map((a: any, idx: number) => [
+            (idx + 1).toString(), 
+            a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A',
+            `₹${(a.amount || 0).toFixed(2)}`
+          ]);
           const total = pay.advances.reduce((a: number, b: any) => a + (b.amount || 0), 0);
-          drawSection("Advance Payments", ["S.No","Date","","","Amount"], body, "Total Advance", total);
+          drawSection("Advance Payments", ["S.No", "Date", "Amount"], body, "Total Advance", total);
         }
-
+  
         if (pay.additionalCharges?.length) {
-          const body = pay.additionalCharges.map((a: any, idx: number) => [idx+1, a.particular,"","","",(a.amount || 0).toFixed(2)]);
+          const body = pay.additionalCharges.map((a: any, idx: number) => [
+            (idx + 1).toString(), 
+            a.particular || '',
+            `₹${(a.amount || 0).toFixed(2)}`
+          ]);
           const total = pay.additionalCharges.reduce((a: number, b: any) => a + (b.amount || 0), 0);
-          drawSection("Additional Charges", ["S.No","Particular","","","Amount"], body, "Total Additional", total);
+          drawSection("Additional Charges", ["S.No", "Particular", "Amount"], body, "Total Additional", total);
         }
+  
+        // Add spacing between payments
+        yPos += 10;
       });
-
-      doc.save("payment-register.pdf");
+  
+      // Final summary on last page
+      if (doc.getNumberOfPages() > 0) {
+        doc.setPage(doc.getNumberOfPages());
+        yPos = (doc as any).lastAutoTable?.finalY || yPos;
+        
+        if (yPos < pageHeight - 100) {
+          doc.setFillColor(colors.lightBg[0], colors.lightBg[1], colors.lightBg[2]);
+          doc.rect(margin, yPos, contentWidth, 30, 'F');
+          doc.setFontSize(10).setFont("helvetica", "bold");
+          doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+          doc.text("REPORT SUMMARY", pageWidth / 2, yPos + 20, { align: "center" });
+          
+          doc.setFontSize(9).setFont("helvetica", "normal");
+          doc.setTextColor(0, 0, 0);
+          doc.text(`Total Payments Processed: ${this.payments.length}`, margin + 10, yPos + 40);
+          doc.text(`Grand Total Amount: ₹${totalAmount.toFixed(2)}`, pageWidth - margin - 10, yPos + 40, { align: "right" });
+          
+          // Add payment mode summary
+          const cashAmount = paymentModeBreakdown['Cash']?.amount || 0;
+          const otherAmount = totalAmount - cashAmount;
+          yPos += 25;
+          doc.text(`Cash Payments: ₹${cashAmount.toFixed(2)} (${((cashAmount / totalAmount) * 100).toFixed(1)}%)`, margin + 10, yPos + 40);
+          doc.text(`Other Payments: ₹${otherAmount.toFixed(2)} (${((otherAmount / totalAmount) * 100).toFixed(1)}%)`, pageWidth - margin - 10, yPos + 40, { align: "right" });
+        }
+      }
+  
+      doc.save(`payment-register-${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
       console.error('Error exporting PDF:', error);
     }
   }
-
-  async exportSinglePDF(payment: any): Promise<void> {
-    try {
-      const doc = new jsPDF.default('p', 'pt', 'a4');
+  
+  // Add the missing method to calculate payment mode breakdown
+  private calculatePaymentModeBreakdown(): { [key: string]: { count: number, amount: number } } {
+    const breakdown: { [key: string]: { count: number, amount: number } } = {};
+    
+    this.payments.forEach(payment => {
+      const mode = payment.paymentMode || 'Unknown';
+      const amount = payment.paymentAmount || 0;
       
-      doc.setFontSize(16).setFont("helvetica", "bold");
-      doc.text("Payment Receipt", 20, 30);
+      if (!breakdown[mode]) {
+        breakdown[mode] = { count: 0, amount: 0 };
+      }
       
-      doc.setFontSize(10).setFont("helvetica", "normal");
-      doc.text(`Student: ${payment.studentName}`, 20, 60);
-      doc.text(`Room: ${payment.roomNo}`, 20, 80);
-      doc.text(`Date: ${new Date(payment.paymentDate).toLocaleDateString()}`, 20, 100);
-      doc.text(`Amount: ${payment.paymentAmount?.toFixed(2) || '0.00'}`, 20, 120);
-      doc.text(`Type: ${payment.paymentType}`, 20, 140);
-      doc.text(`Mode: ${payment.paymentMode}`, 20, 160);
-      doc.text(`Status: ${payment.paymentStatus}`, 20, 180);
-      
-      doc.save(`payment-${payment.studentName}-${payment.paymentDate}.pdf`);
-    } catch (error) {
-      console.error('Error exporting single PDF:', error);
-    }
+      breakdown[mode].count++;
+      breakdown[mode].amount += amount;
+    });
+    
+    return breakdown;
   }
-
-  // Helper to convert image to Base64
+  
+  // Helper function remains the same
   private async getImageAsBase64(url: string): Promise<string> {
     try {
       const response = await fetch(url);
