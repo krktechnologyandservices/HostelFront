@@ -495,7 +495,7 @@ export class PaymentRegisterComponent implements OnInit, OnDestroy {
         }
   
         // Format payment number to 5 digits with leading zeros
-        const formattedPaymentNo = (pay.paymentNo || (index + 1)).toString().padStart(5, '0');
+        const formattedPaymentNo =pay.paymentId? (pay.paymentId ).toString().padStart(5, '0'):'N/A';
   
         // Payment card header
         doc.setFillColor(colors.lightBg[0], colors.lightBg[1], colors.lightBg[2]);
