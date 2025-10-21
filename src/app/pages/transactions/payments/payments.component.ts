@@ -133,7 +133,6 @@ export class PaymentListComponent implements OnInit {
   // --- Keep your existing generateReceiptPdf(), QR, and number-to-words methods as is ---
   // ... (copy all existing PDF methods from your current component)
 
-
 /// --- A4 Size Optimized Individual Payment Receipt ---
 public async generateReceiptPdf(payment: any) {
   const doc = new jsPDF();
@@ -162,10 +161,16 @@ public async generateReceiptPdf(payment: any) {
     doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
     doc.text('DALE VIEW HOSTEL', 60, 18);
     
+    // Tagline
     doc.setFontSize(7);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100, 100, 100);
     doc.text('Premium Student Accommodation', 60, 24);
+    
+    // Address line - added after tagline
+    doc.setFontSize(6);
+    doc.setTextColor(80, 80, 80);
+    doc.text('Punalal Post.695575, Poovachal, Thiruvananthapuram', 60, 28);
   } catch (err) {
     console.warn('Logo load failed:', err);
     // Fallback header without logo
@@ -173,18 +178,28 @@ public async generateReceiptPdf(payment: any) {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
     doc.text('DALE VIEW HOSTEL', pageWidth / 2, 20, { align: 'center' });
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text('Premium Student Accommodation', pageWidth / 2, 26, { align: 'center' });
+    
+    // Address in fallback header
+    doc.setFontSize(7);
+    doc.setTextColor(80, 80, 80);
+    doc.text('Punalal Post.695575, Poovachal, Thiruvananthapuram', pageWidth / 2, 32, { align: 'center' });
   }
 
   // --- Receipt Header with Background ---
   doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
-  doc.rect(0, 32, pageWidth, 18, 'F');
+  doc.rect(0, 38, pageWidth, 18, 'F'); // Moved down to 38 to accommodate the extra line
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 255, 255);
-  doc.text('OFFICIAL PAYMENT RECEIPT', pageWidth / 2, 44, { align: 'center' });
+  doc.text('OFFICIAL PAYMENT RECEIPT', pageWidth / 2, 50, { align: 'center' }); // Adjusted y position
 
-  y = 52;
+  y = 58; // Adjusted y position
 
   // --- Receipt ID & Date - Compact Layout ---
   const formattedId = `REC-${payment.paymentId.toString().padStart(4, '0')}`;
@@ -515,8 +530,8 @@ public async generateReceiptPdf(payment: any) {
   
   // Company logo in footer (small)
   try {
-    const logoDataSmall = await this.getImageAsBase64('assets/images/DaleViewLogo.jpg');
-    doc.addImage(logoDataSmall, 'PNG', pageWidth / 2 - 12, y, 24, 10);
+    // const logoDataSmall = await this.getImageAsBase64('assets/images/DaleViewLogo.jpg');
+    // doc.addImage(logoDataSmall, 'PNG', pageWidth / 2 - 12, y, 24, 10);
     y += 12;
   } catch (err) {
     // Continue without footer logo
@@ -538,6 +553,7 @@ public async generateReceiptPdf(payment: any) {
   const fileName = `Receipt_${formattedId}_${payment.studentName.replace(/\s+/g, '_')}.pdf`;
   doc.save(fileName);
 }
+
 
 // --- Convert number to words (unchanged) ---
 private convertNumberToWords(amount: number): string {
