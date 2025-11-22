@@ -16,14 +16,14 @@ export class BookingComponent implements OnInit {
   students: Student[] = [];
   rooms: Room[] = [];
   searchQuery = '';
-
+  temporaryAmount: number | null = null;
   // Vocation modal properties
   selectedBooking: Booking | null = null;
   selectedVocationType: 'Temporary' | 'Permanent' | null = null;
   vocationDate: string = '';
   returnDate: string = '';
   vocationReason: string = '';
-  minDate: string = new Date().toISOString().split('T')[0];
+  minDate: string ;
   showVocationModal = false;
 
   constructor(
@@ -31,7 +31,13 @@ export class BookingComponent implements OnInit {
     private studentService: StudentService,
     private roomService: RoomService,
     private router: Router
-  ) {}
+  ) {
+
+
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth()-2, 1);
+    this.minDate = firstDay.toISOString().split('T')[0];
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -105,6 +111,7 @@ export class BookingComponent implements OnInit {
     this.vocationReason = booking.vocationReason || '';
     this.showVocationModal = true;
     this.preventBodyScroll();
+    this.temporaryAmount = booking.temporaryAmount || null; // Initialize temporary amount
   }
 
   closeVocationModal() {
@@ -129,7 +136,8 @@ export class BookingComponent implements OnInit {
       vocationType: this.selectedVocationType,
       returnDate: this.selectedVocationType === 'Temporary' ? this.returnDate : null,
       vocationReason: this.vocationReason || null,
-      status: this.selectedVocationType === 'Permanent' ? 'Completed' : 'Vocate'
+      status: this.selectedVocationType === 'Permanent' ? 'Completed' : 'Vocate',
+      temporaryAmount: this.selectedVocationType === 'Temporary' ? this.temporaryAmount : null // Add 
     };
 
     this.bookingService.updateVocation(this.selectedBooking.id!, vocationData).subscribe({
@@ -151,6 +159,7 @@ export class BookingComponent implements OnInit {
     this.vocationDate = '';
     this.returnDate = '';
     this.vocationReason = '';
+    this.temporaryAmount = null; 
   }
 
   // Method to prevent body scroll when modal opens

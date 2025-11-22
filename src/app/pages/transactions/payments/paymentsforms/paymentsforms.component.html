@@ -7,23 +7,65 @@
   </nb-card-header>
 
   <nb-card-body class="payment-form-body" [formGroup]="form">
-    <!-- Student Selection -->
-    <div class="form-section">
-      <h5 class="section-title">Student Information</h5>
-      <div class="form-grid">
-        <div class="form-item">
-          <label class="form-label">Student</label>
-          <nb-select formControlName="studentId" placeholder="Select student" fullWidth>
-            <nb-option *ngFor="let s of students" [value]="s.studentId">
-              <div class="student-option">
-                <span class="name">{{ s.fullName }}</span>
-                <span class="id">({{ s.studentId }})</span>
-              </div>
-            </nb-option>
-          </nb-select>
-        </div>
+   <!-- Student Selection -->
+<div class="form-section">
+  <h5 class="section-title">Student Information</h5>
+  <div class="form-grid">
+    <div class="form-item">
+      <label class="form-label">Student</label>
+      <nb-select 
+        formControlName="studentId" 
+        placeholder="Type to search students..." 
+        fullWidth
+        (searchInput)="filterStudents($event)"
+        (closed)="clearStudentFilter()">
+        
+        <!-- Search input inside dropdown -->
+        <nb-option>
+          <div class="search-container">
+            <input 
+              #searchInput
+              type="text" 
+              class="student-search-input" 
+              placeholder="Search by name, ID, email or phone..."
+              [value]="studentSearchQuery"
+              (input)="filterStudents($event)"
+              (click)="$event.stopPropagation()">
+          </div>
+        </nb-option>
+        
+        <!-- Student options -->
+        <nb-option *ngFor="let s of filteredStudents" [value]="s.studentId">
+          <div class="student-option">
+            <div class="student-main">
+              <span class="name">{{ s.fullName }}</span>
+              <span class="id">ID: {{ s.studentId }}</span>
+            </div>
+            <div class="student-details" *ngIf="s.phone || s.email">
+              <small class="contact">
+                {{ s.phone }} {{ s.email ? '• ' + s.email : '' }}
+              </small>
+            </div>
+          </div>
+        </nb-option>
+
+        <!-- No results message -->
+        <nb-option *ngIf="filteredStudents.length === 0 && studentSearchQuery" disabled>
+          <div class="no-results">
+            <nb-icon icon="search-outline"></nb-icon>
+            No students found for "{{ studentSearchQuery }}"
+          </div>
+        </nb-option>
+      </nb-select>
+      
+      <!-- Selected student display -->
+      <div class="selected-student" *ngIf="form.get('studentId')?.value">
+        <nb-icon icon="person-outline"></nb-icon>
+        {{ getSelectedStudentName() }}
       </div>
     </div>
+  </div>
+</div>
 
     <!-- Payment Details -->
     <div class="form-section">

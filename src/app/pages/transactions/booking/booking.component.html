@@ -354,6 +354,27 @@
           This will mark the booking as completed and the room will be made available for new bookings.
         </p>
       </div>
+
+        <!-- Add this section after the Expected Return Date section -->
+      <div class="form-section" *ngIf="selectedVocationType === 'Temporary'">
+        <label class="section-label" for="temporaryAmount">Temporary Vocation Amount</label>
+        <input 
+          nbInput 
+          fullWidth 
+          id="temporaryAmount"
+          type="number" 
+          placeholder="Enter amount for temporary vocation period"
+          [(ngModel)]="temporaryAmount"
+          min="0"
+          step="0.01"
+          class="modern-date-input">
+        <div class="date-hint">
+          <nb-icon icon="info-outline" class="hint-icon"></nb-icon>
+          <span>Enter the applicable amount for the temporary vocation period</span>
+        </div>
+      </div>
+
+
     </nb-card-body>
 
     <nb-card-footer class="modal-footer">

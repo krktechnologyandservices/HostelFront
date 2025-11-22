@@ -40,9 +40,11 @@ export class PaymentFormComponent implements OnInit {
   @Input() payment?: PaymentViewExtended;
   form!: FormGroup;
   students: any[] = [];
+  filteredStudents: any[] = [];
   bookings: Booking[] = [];
   pendingBills: PendingBill[] = [];
   expenseHeads: ExpenseHead[] = [];
+  studentSearchQuery: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -66,10 +68,18 @@ export class PaymentFormComponent implements OnInit {
     });
 
     // Load students and expense heads
-    this.studentService.getAll().subscribe(s => this.students = s);
+    this.studentService.getAll().subscribe(s => {
+      this.students = s;
+      this.filteredStudents = s; // Initialize filtered students
+    });
     this.paymentService.getExpenseHeads().subscribe(h => this.expenseHeads = h);
 
-    // Load bookings and prefill payments if editing
+    // Rest of your existing ngOnInit code...
+    this.loadBookingsAndPrefill();
+    this.setupFormListeners();
+  }
+
+  private loadBookingsAndPrefill() {
     if (this.payment?.studentId) {
       this.loadBookings(this.payment.studentId, () => {
         this.form.patchValue({ bookingId: this.payment?.bookingId });
@@ -91,7 +101,9 @@ export class PaymentFormComponent implements OnInit {
         }
       });
     }
+  }
 
+  private setupFormListeners() {
     // React to student selection changes
     this.form.get('studentId')?.valueChanges.subscribe(studentId => {
       if (studentId) {
@@ -111,6 +123,40 @@ export class PaymentFormComponent implements OnInit {
     });
 
     this.form.get('totalAmount')?.valueChanges.subscribe(() => this.autoAllocate());
+  }
+
+  // Add student filtering method
+  filterStudents(event: any) {
+    const query = event.target.value.toLowerCase().trim();
+    this.studentSearchQuery = query;
+    
+    if (!query) {
+      this.filteredStudents = this.students;
+    } else {
+      this.filteredStudents = this.students.filter(student => 
+        student.fullName.toLowerCase().includes(query) ||
+        student.studentId.toString().includes(query) ||
+        (student.email && student.email.toLowerCase().includes(query)) ||
+        (student.phone && student.phone.includes(query))
+      );
+    }
+  }
+
+  // Clear filter when dropdown closes
+  clearStudentFilter() {
+    setTimeout(() => {
+      this.studentSearchQuery = '';
+      this.filteredStudents = this.students;
+    }, 200);
+  }
+
+  // Display selected student name in the input
+  getSelectedStudentName(): string {
+    const studentId = this.form.get('studentId')?.value;
+    if (!studentId) return '';
+    
+    const student = this.students.find(s => s.studentId === studentId);
+    return student ? `${student.fullName} (${student.studentId})` : '';
   }
 
   get billAdjArray() { return this.form.get('billAdjustments') as FormArray; }

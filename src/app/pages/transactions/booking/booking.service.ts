@@ -21,6 +21,10 @@ export interface Booking {
   remarks?: string;
   studentName?: string;
   roomNumber?: string;
+  vacationDate?: string | null;
+  vacationType?: string | null;
+  vacationReason?: string | null;
+  temporaryAmount: number;
 }
 
 export interface VocationData {
@@ -29,6 +33,7 @@ export interface VocationData {
   returnDate?: string | null;
   vocationReason?: string | null;
   status: string;
+  temporaryAmount:number;
 }
 
 @Injectable({ providedIn: 'root' })
